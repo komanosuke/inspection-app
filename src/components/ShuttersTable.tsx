@@ -3,22 +3,9 @@
 import React, { useState } from "react";
 
 const ShuttersTable = ({ shutters }) => {
-    const [searchTerm, setSearchTerm] = useState("");
 
     return (
         <div className="">
-            {/* 検索バーとExcelファイル出力ボタン */}
-            <div className="flex items-center gap-4 mb-4">
-                {/* 検索バー */}
-                <input
-                    type="text"
-                    placeholder="🔍 検索..."
-                    className="p-2 border rounded-full w-full shadow-sm"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-
             <div className="flex text-xs md:text-base">
                 <table className="border-collapse border border-gray-300 text-center">
                     <thead className="text-gray-700">
@@ -32,8 +19,11 @@ const ShuttersTable = ({ shutters }) => {
                             <tr key={shutter.id} className="bg-gray-200">
                                 <td className="border border-gray-300 px-0 py-0 h-[100px]">
                                     <div className="w-full h-full flex flex-col">
-                                        <div className="text-center px-2 flex-1 flex items-center justify-center">
+                                        <div className="border-b border-gray-300 border-dashed text-center px-2 flex-1 flex items-center justify-center">
                                             {index+1}
+                                        </div>
+                                        <div className="text-center px-2 flex-1 flex items-center justify-center">
+                                            👀 ✏️ 🗑️
                                         </div>
                                     </div>
                                 </td>

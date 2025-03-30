@@ -102,17 +102,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, myCompanyType }) =
                             <ul>
                                 <NavItem icon="📊" label="ダッシュボード" href="/" />
 
-                                <NavItem icon="🏢" label="会社プロフィール" href="/profile" />
+                                <NavItem icon="🏢" label="設定・管理" href="/profile" />
 
-                                {myCompanyType === "管理会社" && (
-                                    <NavItem icon="📍" label="現場管理" href="/sites" />
-                                )}
-
-                                <NavItem icon="👷" label="検査者管理" href="/inspectors" />
-
-                                <NavItem icon="👷" label="シャッター管理" href="/shutters" />
-
-                                <NavItem icon="👷" label="検査記録管理" href="/inspector_records" />
+                                <NavItem icon="📋" label="検査記録作成" href="/inspection_records/new" />
                             </ul>
                         </nav>
                         <Logout />

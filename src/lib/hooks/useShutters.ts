@@ -73,6 +73,7 @@ export function useShutters() {
 
     return {
         shutters,
+        setShutters,
         fetchShutters,
         createShutter,
         updateShutter,

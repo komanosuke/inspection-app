@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import LoginCheck from '@/components/LoginCheck';
 import InspectionRecordsTable from "@/components/InspectionRecordsTable";
 import Modal from "@/components/Modal";
 import InspectionRecordData from "@/components/InspectionRecordData";
-import InspectionRecordRegisterForm from "@/components/InspectionRecordRegisterForm";
-import LoadingSpinner from "@/components/LoadingSpinner";
 // import { useInspectionRecords } from "@/lib/hooks/useInspectionRecords";
 import { useShutters } from "@/lib/hooks/useShutters";
 
@@ -36,9 +35,7 @@ const InspectionRecordsPage = () => {
                     sub_category: "塗装",
                     inspection_name: "シャッター表面の塗装状態",
                     target_existence: true,
-                    no_issue: true,
-                    needs_correction: false,
-                    existing_non_compliance: false,
+                    inspection_result: "no_issue",
                     situation_measures: "良好な状態を確認",
                     inspector_number: "YMD001",
                     created_at: "2025-03-10T09:00:00.000Z",
@@ -52,9 +49,7 @@ const InspectionRecordsPage = () => {
                     sub_category: "開閉機構",
                     inspection_name: "開閉時の異音有無",
                     target_existence: true,
-                    no_issue: false,
-                    needs_correction: true,
-                    existing_non_compliance: false,
+                    inspection_result: "no_issue",
                     situation_measures: "異音あり、注油と部品交換が必要",
                     inspector_number: "YMD002",
                     created_at: "2025-03-10T09:00:00.000Z",
@@ -80,9 +75,7 @@ const InspectionRecordsPage = () => {
                     sub_category: "配線",
                     inspection_name: "制御盤内配線の状態",
                     target_existence: true,
-                    no_issue: false,
-                    needs_correction: false,
-                    existing_non_compliance: true,
+                    inspection_result: "no_issue",
                     situation_measures: "古い規格の配線が使用されている",
                     inspector_number: "TNS001",
                     created_at: "2025-03-15T10:30:00.000Z",
@@ -122,14 +115,14 @@ const InspectionRecordsPage = () => {
     return (
         <LoginCheck>
             <div className="bg-white p-4 md:p-8 shadow rounded-lg">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-xl font-bold">検査記録一覧</h1>
+                <div className="sm:flex justify-between items-center mb-4">
+                    <h1 className="text-xl font-bold mb-2 sm:mb-0">検査記録一覧</h1>
                     {/* ✅ セレクトボックスを追加 */}
                     <select
                         title="シャッターを選択"
                         value={selectedShutterId}
                         onChange={(e) => setSelectedShutterId(e.target.value)}
-                        className="border p-2 rounded-md"
+                        className="border p-2 rounded-md mb-2 sm:mb-0"
                     >
                         <option value="all">シャッターを選択</option>
                         {shutters && shutters.map((shutter) => (
@@ -146,12 +139,12 @@ const InspectionRecordsPage = () => {
                         記録を見る（表につける）
                     </button>
 
-                    <button
-                        onClick={() => setIsModalOpen(true)}
+                    <Link
+                        href="/inspection_records/new"
                         className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                     >
                         ＋ 新規作成
-                    </button>
+                    </Link>
                 </div>
 
                 {/* 🔄 ローディング表示 */}
@@ -173,11 +166,6 @@ const InspectionRecordsPage = () => {
                         <div className="text-center p-6">📂 検査記録データがありません</div>
                     )
                 )}
-
-                {/* モーダル（新規登録） */}
-                <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <InspectionRecordRegisterForm onClose={() => setIsModalOpen(false)} />
-                </Modal>
                 
                 {/* モーダル（個別の記録表示） */}
                 <Modal isOpen={isInspectionRecordModalOpen} onClose={() => setIsInspectionRecordModalOpen(false)}>

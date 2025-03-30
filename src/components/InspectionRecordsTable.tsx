@@ -3,22 +3,9 @@
 import React, { useState } from "react";
 
 const InspectionRecordsTable = ({ inspectionRecords }) => {
-    const [searchTerm, setSearchTerm] = useState("");
 
     return (
         <div className="">
-            {/* 検索バーとExcelファイル出力ボタン */}
-            <div className="flex items-center gap-4 mb-4">
-                {/* 検索バー */}
-                <input
-                    type="text"
-                    placeholder="🔍 検索..."
-                    className="p-2 border rounded-full w-full shadow-sm"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-
             <div className="flex text-xs md:text-base">
                 <table className="border-collapse border border-gray-300 text-center">
                     <thead className="text-gray-700">

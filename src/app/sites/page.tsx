@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import LoginCheck from "@/components/LoginCheck";
 import SitesTable from "@/components/SitesTable";
 import Modal from "@/components/Modal";
@@ -11,55 +11,26 @@ import { useCompanyPermissions } from "@/lib/hooks/useCompanyPermissions";
 
 const SitesPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [company, setCompany] = useState<{ id: string; name: string } | null>(null);
     const [permittedCompanies, setPermittedCompanies] = useState([]);
     
     const { fetchMyCompany, fetchCompanies, myCompany, companies, loading: companyLoading } = useCompanies();
     const { fetchMyCompanyPermissions, myCompanyPermissions } = useCompanyPermissions();
     const { fetchSites, sites, loading: sitesLoading } = useSites();
-
-    // ✅ `userCompanyId` の初期値を `localStorage` から取得して再レンダリングを防ぐ
     const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
+
     useEffect(() => {
-        const id = localStorage.getItem("user_id");
-        setUserCompanyId(id);
+        const user_id = localStorage.getItem("user_id");
+        setUserCompanyId(user_id);
     }, []);
 
-    // ✅ `fetchMyCompany` を `useCallback` でメモ化（無駄なレンダリング防止）
-    const getMyCompany = useCallback(async () => {
-        if (userCompanyId) {
-            await fetchMyCompany(userCompanyId);
-        }
-    }, [userCompanyId]); // ✅ `fetchMyCompany` への依存を解除
-
-    // ✅ `fetchCompanies` を `useCallback` でメモ化（無駄なレンダリング防止）
-    const getCompanies = useCallback(async () => {
-        if (userCompanyId) {
-            await fetchCompanies(userCompanyId);
-            await fetchMyCompanyPermissions(userCompanyId);
-        }
-    }, [userCompanyId]); // ✅ `fetchCompanies` への依存を解除
-
-    // ✅ `fetchSites` を `useCallback` でメモ化（無駄なレンダリング防止）
-    const getSites = useCallback(async () => {
-        if (userCompanyId) {
-            await fetchSites(undefined, userCompanyId);
-        }
-    }, [userCompanyId]); // ✅ `fetchSites` への依存を解除
-
-    // ✅ `useEffect` で一度だけ実行
     useEffect(() => {
-        getMyCompany();
-        getCompanies();
-        getSites();
-    }, [getMyCompany, getCompanies, getSites]); // ✅ `useCallback` の関数を依存配列に
-
-    // **自分の会社情報が取得できたら `company` をセット**
-    useEffect(() => {
-        if (myCompany) {
-            setCompany(myCompany);
+        if (userCompanyId) {
+            fetchMyCompany(userCompanyId);
+            fetchCompanies(userCompanyId);
+            fetchMyCompanyPermissions(userCompanyId);
+            fetchSites(undefined, userCompanyId);
         }
-    }, [myCompany]);
+    }, [userCompanyId]);
 
     useEffect(() => {
         if (myCompanyPermissions) {
@@ -87,8 +58,8 @@ const SitesPage = () => {
     return (
         <LoginCheck>
             <div className="bg-white p-4 md:p-8 shadow rounded-lg">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-xl font-bold">現場一覧</h1>
+                <div className="sm:flex justify-between items-center mb-4">
+                    <h1 className="text-xl font-bold mb-2 sm:mb-0">現場一覧</h1>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -121,7 +92,7 @@ const SitesPage = () => {
                 {/* モーダル（新規登録） */}
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                     <SiteRegisterForm 
-                        company={company}
+                        company={myCompany}
                         permittedCompanies={permittedCompanies} // 自分以外の許可された会社一覧を渡す
                         onClose={() => setIsModalOpen(false)} 
                     />

@@ -1,19 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
-// import { useShutters } from "@/lib/hooks/useShutters";
+import { useShutters } from "@/lib/hooks/useShutters";
 import { Shutter } from "@/types/shutter";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
-const ShutterRegisterForm = ({ onClose }: { onClose: () => void }) => {
-    // const { createShutter, updateShutter, deleteShutter } = useShutters();
+const ShutterRegisterForm = ({
+    onClose,
+    siteId,
+    siteName,
+}: {
+    onClose: () => void;
+    siteId: string;
+    siteName: string;
+}) => {
+    const { createShutter, updateShutter, deleteShutter } = useShutters();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isEmergencyMode, setIsEmergencyMode] = useState(false); // ✅ 緊急モードのstate
-    const companyId = localStorage.getItem("user_id") || "";
 
     const [formData, setFormData] = useState<Shutter>({
-        site_id: companyId, // 現場IDに対応（例）
+        site_id: siteId || "", // 現場IDに対応（例）
         name: "",
         model_number: "",
     });
@@ -36,61 +42,61 @@ const ShutterRegisterForm = ({ onClose }: { onClose: () => void }) => {
         setLoading(true);
         setError(null);
     
-        // try {
-        //     console.log(formData);
-    
-        //     // ✅ まず "保存失敗" として Supabase に shutter を登録
-        //     const initialShutterData = { ...formData, face_image_url: "保存失敗" };
-        //     console.log("🟢 1. 仮のデータを Supabase に登録:", JSON.stringify(initialShutterData, null, 2));
+        try {
+            console.log(formData);
 
-        //     const sanitizedFormData = {
-        //         ...formData,
-        //         inspection_date: formData.inspection_date || null,
-        //     };
+            const sanitizedFormData = {
+                ...formData,
+                // inspection_date: formData.inspection_date || null,
+            };
     
-        //     const createResult = await createShutter(sanitizedFormData);
+            const createResult = await createShutter(sanitizedFormData);
     
-        //     if (!createResult.success) {
-        //         throw new Error(`Supabase 登録に失敗: ${createResult.error}`);
-        //     }
+            if (!createResult.success) {
+                throw new Error(`Supabase 登録に失敗: ${createResult.error}`);
+            }
     
-        //     const shutterId = createResult.data[0]?.id;
-        //     if (!shutterId) {
-        //         throw new Error("Supabase の登録データから shutterId を取得できませんでした");
-        //     }
-    
-        //     console.log(`🟢 2. shutterId: ${shutterId} が登録完了`);
+            alert("新規のシャッターを登録しました。");
             
-        //     // ✅ 成功したらモーダルを閉じる
-        //     onClose();
-        //     window.location.reload()        
-        // } catch (err: any) {
-        //     console.error("🔴 エラー:", err);
-        //     setError(err.message);
-        // } finally {
-        //     setLoading(false);
-        // }
+            // ✅ 成功したらモーダルを閉じる
+            onClose();
+            window.location.reload()        
+        } catch (err: any) {
+            console.error("🔴 エラー:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };    
     
 
     return (
         <div className="md:p-6">
+            {loading && <LoadingSpinner />}
+
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">シャッター登録</h1>
             </div>
 
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
+                    <label className="block font-bold mb-2" htmlFor="name">現場（必須）</label>
+                    { siteName ? (
+                        <p className="">{siteName}</p>
+                    ) : (
+                        <p className="text-red-500">画面を一度閉じて、追加先の現場を選択してください。</p>
+                    )}
+                </div>
+
+                <div className="mb-4">
                     <label className="block font-bold mb-2" htmlFor="name">シャッター名（必須）</label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="date" id="name" value={formData.name} onChange={handleChange} required={!isEmergencyMode} />
+                    <input className="w-full px-4 py-2 border rounded-lg" type="text" id="name" value={formData.name} onChange={handleChange} required />
                 </div>
 
                 <div className="mb-4">
                     <label className="block font-bold mb-2" htmlFor="model_number">モデル番号（必須）</label>
                     <input className="w-full px-4 py-2 border rounded-lg" type="text" id="model_number" value={formData.model_number} onChange={handleChange} required />
                 </div>
-
-                {/* ここに各検査項目をループで登録 */}
 
                 <div className="flex justify-end">
                     <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">登録</button>

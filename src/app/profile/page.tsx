@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import LoginCheck from "@/components/LoginCheck";
+import PageLockGuard from "@/components/PageLockGuard";
 import CompanyForPermissionSelection from "@/components/CompanyForPermissionSelection";
 import { useCompanies } from "@/lib/hooks/useCompanies";
 import { useCompanyPermissions } from "@/lib/hooks/useCompanyPermissions";
@@ -22,47 +24,30 @@ export default function ProfilePage() {
     const [errors, setErrors] = useState<Record<string, string>>({}); // ✅ エラーメッセージ管理
 
     const [selectedCompanies, setSelectedCompanies] = useState<Company[]>([]);
+    const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
 
     const { fetchCompanies, fetchMyCompany, createCompany, updateCompany, myCompany, companies } = useCompanies();
     const { fetchMyCompanyPermissions, createCompanyPermission, updateCompanyPermission, deleteCompanyPermission, myCompanyPermissions } = useCompanyPermissions();
 
-    // ✅ `fetchMyCompany` を useCallback でメモ化（依存配列を `[]` に固定）
-    const getMyCompany = useCallback(async (userId: string) => {
-        try {
-            await fetchMyCompany(userId);
-            await fetchCompanies(userId);
-        } catch (error) {
-            console.error("❌ 会社情報取得エラー:", error);
-        } finally {
-            setIsLoading(false); // ✅ データ取得後にローディングを解除
-        }
-    }, []); // ✅ `fetchMyCompany` への依存を解除
-
-    const getMyCompanyPermission = useCallback(async (userId: string) => {
-        try {
-            await fetchMyCompanyPermissions(userId);
-        } catch (error) {
-            console.error("❌ 会社情報取得エラー:", error);
-        } finally {
-            setIsLoading(false); // ✅ データ取得後にローディングを解除
-        }
-    }, []);
-
     useEffect(() => {
-        const userId = localStorage.getItem("user_id") || "";
-        if (!userId) {
+        const user_id = localStorage.getItem("user_id") || "";
+        if (!user_id) {
             console.error("❌ ユーザーIDが見つかりません。");
             alert("ユーザーIDが見つかりません。");
             setIsLoading(false);
             return;
         }
+        setUserCompanyId(user_id);
 
-        console.log("✅ ローカルストレージから取得したユーザーID:", userId);
-        setForm((prev) => ({ ...prev, id: userId }));
+        console.log("✅ ローカルストレージから取得したユーザーID:", user_id);
+        setForm((prev) => ({ ...prev, id: user_id }));
 
-        getMyCompany(userId); // ✅ メモ化した関数を実行
-        getMyCompanyPermission(userId);
-    }, [getMyCompany, getMyCompanyPermission]); // ✅ `useEffect` の依存配列
+        fetchMyCompany(user_id);
+        fetchCompanies(user_id);
+
+        fetchMyCompanyPermissions(user_id);
+        setIsLoading(false);
+    }, [userCompanyId]);
 
     useEffect(() => {
         if (myCompany) {
@@ -192,71 +177,140 @@ export default function ProfilePage() {
         }
     };    
 
+    // ✅ パスワード用のリアルタイムバリデーション関数
+    const handlePasswordChange = (value: string) => {
+        if (/^[A-Za-z0-9]{6,20}$/.test(value)) {
+            setForm({ ...form, page_lock_password: value });
+            setErrors({ ...errors, page_lock_password: "" }); // ✅ エラーリセット
+        } else {
+            setForm({ ...form, page_lock_password: value });
+            setErrors({
+                ...errors,
+                page_lock_password: "半角英数字6〜20文字で入力してください。",
+            });
+        }
+    };
+
+
     return (
         <LoginCheck>
-            <div className="bg-white p-4 md:p-8 shadow rounded-lg">
-                <h1 className="text-xl font-bold mb-4">会社プロフィール設定</h1>
+            <PageLockGuard
+                company={myCompany}
+            >
+                <div className="bg-white p-4 md:p-8 shadow rounded-lg">
+                    <h1 className="text-xl font-bold mb-4">会社プロフィール設定</h1>
 
-                {isLoading ? (
-                    <p className="text-center">🔄 データを取得中...</p>
-                ) : (
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-4">
-                            <label className="block font-bold mb-2">会社名（必須）</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={form.name}
-                                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                className="w-full p-2 border rounded"
-                                required
-                            />
-                            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-                        </div>
+                    {isLoading ? (
+                        <p className="text-center">🔄 データを取得中...</p>
+                    ) : (
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2">会社名（必須）</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={form.name}
+                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                    className="w-full p-2 border rounded"
+                                    required
+                                />
+                                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                            </div>
 
-                        <div className="mb-4">
-                            <label className="block font-bold mb-2">代表者名（必須）</label>
-                            <input
-                                type="text"
-                                name="representative_name"
-                                value={form.representative_name}
-                                onChange={(e) => setForm({ ...form, representative_name: e.target.value })}
-                                className="w-full p-2 border rounded"
-                                required
-                            />
-                            {errors.representative_name && <p className="text-red-500 text-sm">{errors.representative_name}</p>}
-                        </div>
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2">代表者名（必須）</label>
+                                <input
+                                    type="text"
+                                    name="representative_name"
+                                    value={form.representative_name}
+                                    onChange={(e) => setForm({ ...form, representative_name: e.target.value })}
+                                    className="w-full p-2 border rounded"
+                                    required
+                                />
+                                {errors.representative_name && <p className="text-red-500 text-sm">{errors.representative_name}</p>}
+                            </div>
 
-                        <div className="mb-4">
-                            <label className="block font-bold mb-2">利用モード（必須）<span className="text-red-500 text-xs">※ サイドバーの表示が変わります。常時切り替え可能です。</span></label>
-                            <select
-                                name="type"
-                                value={form.type}
-                                onChange={(e) => setForm({ ...form, type: e.target.value })}
-                                className="w-full p-2 border rounded"
-                                required
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2">利用モード（必須）</label>
+                                <select
+                                    name="type"
+                                    value={form.type}
+                                    onChange={(e) => setForm({ ...form, type: e.target.value })}
+                                    className="w-full p-2 border rounded"
+                                    required
+                                >
+                                    <option value="">選択してください</option>
+                                    <option value="管理会社">管理会社</option>
+                                    <option value="協力会社">協力会社</option>
+                                </select>
+                                {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
+                            </div>
+
+                            {form.type === "協力会社" && (
+                                <CompanyForPermissionSelection
+                                    availableCompanies={companies || []}
+                                    selectedCompanies={selectedCompanies}
+                                    setSelectedCompanies={setSelectedCompanies}
+                                />
+                            )}
+
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2">設定・管理ページのページロックパスワード（必須）</label>
+                                <input
+                                    type="text"
+                                    name="page_lock_password"
+                                    value={form.page_lock_password}
+                                    onChange={(e) => handlePasswordChange(e.target.value)}
+                                    className="w-full p-2 border rounded"
+                                    placeholder="半角英数6文字以上20文字以内"
+                                    minLength={6}
+                                    maxLength={20}
+                                    pattern="[A-Za-z0-9]{6,20}"
+                                    required
+                                />
+                                {errors.page_lock_password && <p className="text-red-500 text-sm">{errors.page_lock_password}</p>}
+                            </div>
+
+                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                                {isRegistered ? "更新" : "登録"}
+                            </button>
+                        </form>
+                    )}
+                </div>
+
+                <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
+                    <div className="text-xl font-bold mb-4">管理ページへのリンク</div>
+                    <div className="sm:flex flex-wrap justify-between gap-4">
+                        
+                        {myCompany?.type === "管理会社" && (
+                            <Link
+                                href="/sites"
+                                className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
                             >
-                                <option value="">選択してください</option>
-                                <option value="管理会社">管理会社</option>
-                                <option value="協力会社">協力会社</option>
-                            </select>
-                            {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
-                        </div>
-
-                        {form.type === "協力会社" && (
-                            <CompanyForPermissionSelection
-                                availableCompanies={companies || []}
-                                selectedCompanies={selectedCompanies}
-                                setSelectedCompanies={setSelectedCompanies}
-                            />
+                                📍 現場管理
+                            </Link>
                         )}
-
-                        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                            {isRegistered ? "更新" : "登録"}
-                        </button>
-                    </form>
-                )}
-            </div>
+                        <Link
+                            href="/inspectors"
+                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                        >
+                            👷 検査者管理
+                        </Link>
+                        <Link
+                            href="/shutters"
+                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                        >
+                            🏗️ シャッター管理
+                        </Link>
+                        <Link
+                            href="/inspection_records"
+                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                        >
+                            📋 検査記録管理
+                        </Link>
+                    </div>
+                </div>
+            </PageLockGuard>
         </LoginCheck>
     );
 }

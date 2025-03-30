@@ -21,7 +21,7 @@ export const inspectionItems = [
     { main_category: "連動機構", sub_category: "連動制御器", inspection_name: "接地の状況" },
     { main_category: "連動機構", sub_category: "連動制御器", inspection_name: "予備電源への切り替えの状況" },
     { main_category: "連動機構", sub_category: "連動機構用予備電源", inspection_name: "劣化及び損傷の状況" },
-    { main_category: "連動機構", sub_category: "", inspection_name: "容量の状況" },
+    { main_category: "連動機構", sub_category: "連動機構用予備電源", inspection_name: "容量の状況" },
     { main_category: "連動機構", sub_category: "自動閉鎖装置", inspection_name: "設置の状況" },
     { main_category: "連動機構", sub_category: "手動閉鎖装置", inspection_name: "設置の状況" },
     { main_category: "総合的な作動の状況", sub_category: "", inspection_name: "防火シャッターの閉鎖の状況" },

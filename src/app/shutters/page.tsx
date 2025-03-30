@@ -1,94 +1,87 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import LoginCheck from '@/components/LoginCheck';
 import ShuttersTable from "@/components/ShuttersTable";
 import Modal from "@/components/Modal";
 import ShutterRegisterForm from "@/components/ShutterRegisterForm";
-import LoadingSpinner from "@/components/LoadingSpinner";
-// import { useShutters } from "@/lib/hooks/useShutters";
+import { useSites } from "@/lib/hooks/useSites";
 import { useShutters } from "@/lib/hooks/useShutters";
 
 const ShuttersPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isExporting, setExporting] = useState(false);
-    const loading = false;
-    const error = false;
-    
-    // const { fetchShutters, fetchShuttersByIds, setShutters, loading, error } = useShutters();
-    const shutters = [
-        {
-            id: "400f5f74-4d7b-42f6-9ce4-52f79916d285",
-            site_id: "11111111-1111-1111-1111-111111111111", // 現場IDに対応（例）
-            name: "北側シャッター",
-            model_number: "SHTR-900XH",
-            created_at: "2025-03-01T08:00:00.000Z",
-            updated_at: "2025-03-01T08:00:00.000Z"
-        },
-        {
-            id: "500f5f74-4d7b-42f6-9ce4-52f79916d285",
-            site_id: "11111111-1111-1111-1111-111111111111",
-            name: "A号シャッター",
-            model_number: "SHTR-1200XS",
-            created_at: "2025-03-02T09:30:00.000Z",
-            updated_at: "2025-03-02T09:30:00.000Z"
-        },
-        {
-            id: "600f5f74-4d7b-42f6-9ce4-52f79916d285",
-            site_id: "22222222-2222-2222-2222-222222222222", // 別の現場IDの例
-            name: "西側搬入口シャッター",
-            model_number: "SHTR-1000XL",
-            created_at: "2025-03-03T10:45:00.000Z",
-            updated_at: "2025-03-03T10:45:00.000Z"
+    const { fetchSites, sites } = useSites();
+    const { fetchShutters, setShutters, shutters, error } = useShutters();
+    const [siteId, setSiteId] = useState<string | null>(null);
+    const [siteName, setSiteName] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+
+    useEffect(() => {
+        const siteData = localStorage.getItem("site");
+        if (siteData) {
+            const site = JSON.parse(siteData);
+            setSiteId(site.id);
+            setSiteName(site.name);
         }
-    ];
-      
-      
+        fetchSites();
+    }, []);    
 
-    // ✅ `userCompanyId` を `localStorage` から取得
-    const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
     useEffect(() => {
-        const id = localStorage.getItem("user_id");
-        setUserCompanyId(id);
-    }, []);
-    const [selectedShutterId, setSelectedShutterId] = useState<string | "all">("all");
-    // const { fetchShutters, shutters } = useShutters();
-
-    // ✅ `fetchShutters` を `useCallback` でメモ化（無駄なレンダリング防止）
-    const getShutters = useCallback(async () => {
-        if (!userCompanyId) return;
-        // await fetchShutters(undefined, userCompanyId);
-    }, [userCompanyId]);
-
-    // ✅ `useEffect` で `fetchShutters`と`getShutters` を実行（初回のみ）
-    useEffect(() => {
-        // getShutters();
-    }, [getShutters]);
+        if (siteId) {
+            setLoading(true);
+            fetchShutters(undefined, siteId).finally(() => setLoading(false));
+        }
+    }, [siteId]);
     
-    const handleExportToExcel = () => {
-        setExporting(true);
-        console.log("出力しました!");
-    };
-
+    const handleSiteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedSiteId = e.target.value;
+        const selectedSiteName = sites?.find((site) => site.id === selectedSiteId)?.name || "";
+    
+        if (selectedSiteId === "") {
+            // ✅ 「現場を選択してください」が選ばれたら localStorage を削除
+            localStorage.removeItem("site");
+            setSiteId(null);
+            setSiteName(null);
+            
+            // ✅ シャッターリストをリセット
+            fetchShutters(undefined, "").finally(() => {
+                setLoading(false);
+                setShutters([]); // ここでリセット
+            });
+        } else {
+            setSiteId(selectedSiteId);
+            setSiteName(selectedSiteName);
+    
+            // ✅ オブジェクト形式で localStorage に保存
+            localStorage.setItem(
+                "site",
+                JSON.stringify({
+                    id: selectedSiteId,
+                    name: selectedSiteName,
+                })
+            );
+    
+            setLoading(true);
+            fetchShutters(undefined, selectedSiteId).finally(() => setLoading(false));
+        }
+    };    
+    
     return (
         <LoginCheck>
-            { isExporting && (
-                <LoadingSpinner/>
-            )}
             <div className="bg-white p-4 md:p-8 shadow rounded-lg">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-xl font-bold">シャッター 一覧</h1>
+                <div className="sm:flex justify-between items-center mb-4">
+                    <h1 className="text-xl font-bold mb-2 sm:mb-0">シャッター 一覧</h1>
                     {/* ✅ セレクトボックスを追加 */}
                     <select
-                        title="シャッターを選択"
-                        value={selectedShutterId}
-                        onChange={(e) => setSelectedShutterId(e.target.value)}
-                        className="border p-2 rounded-md"
+                        title="現場を選択"
+                        value={siteId || ""}
+                        onChange={handleSiteChange}
+                        className="border p-2 rounded-md mb-2 sm:mb-0"
                     >
-                        <option value="all">現場を選択</option>
-                        {shutters && shutters.map((shutter) => (
-                            <option key={shutter.id} value={shutter.id}>
-                                {shutter.name}
+                        <option value="">現場を選択してください</option>
+                        {sites && sites.map((site) => (
+                            <option key={site.id} value={site.id}>
+                                {site.name}
                             </option>
                         ))}
                     </select>
@@ -102,28 +95,32 @@ const ShuttersPage = () => {
                 </div>
 
                 {/* 🔄 ローディング表示 */}
-                {loading && <div className="text-center p-6">🔄 検査記録データを取得中...</div>}
+                {loading && <div className="text-center p-6">🔄 シャッターデータを取得中...</div>}
 
                 {/* ❌ エラー表示 */}
                 {error && (
                     <div className="text-center text-red-500 p-4 border border-red-500 rounded-md">
-                        検査記録データの取得に失敗しました。<br />
+                        シャッターデータの取得に失敗しました。<br />
                         <p className="text-xs">{error}</p>
                     </div>
                 )}
 
-                {/* ✅ 検査記録一覧テーブル */}
+                {/* ✅ シャッター一覧テーブル */}
                 {!loading && !error && shutters && shutters.length > 0 ? (
                     <ShuttersTable shutters={shutters} />
                 ) : (
                     !loading && !error && (
-                        <div className="text-center p-6">📂 検査記録データがありません</div>
+                        <div className="text-center p-6">{ siteId && "📂 シャッターデータがありません。"}</div>
                     )
                 )}
 
                 {/* モーダル（新規登録） */}
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <ShutterRegisterForm onClose={() => setIsModalOpen(false)} />
+                    <ShutterRegisterForm
+                        onClose={() => setIsModalOpen(false)}
+                        siteId={siteId || ""}
+                        siteName={siteName || ""}
+                     />
                 </Modal>
             </div>
         </LoginCheck>

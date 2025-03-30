@@ -10,7 +10,7 @@ const InspectionRecordData: React.FC = (inspectionRecord) => {
     };
 
     return (
-        <div className="p-6">
+        <div className="sm:p-6">
             <h2 className="text-xl font-bold mb-4">検査記録詳細</h2>
 
             {/* Excelファイル出力ボタン */}
@@ -27,9 +27,7 @@ const InspectionRecordData: React.FC = (inspectionRecord) => {
                 {inspectionRecord.sub_category && <Item label="検査小項目" value={inspectionRecord.sub_category} />}
                 <Item label="検査事項名" value={inspectionRecord.inspection_name} />
                 <Item label="対象の有無" value={inspectionRecord.target_existence ? "あり" : "なし"} />
-                <Item label="指摘なし" value={inspectionRecord.no_issue ? "✔️" : "❌"} />
-                <Item label="要是正" value={inspectionRecord.needs_correction ? "✔️" : "❌"} />
-                <Item label="既存不適格" value={inspectionRecord.existing_non_compliance ? "✔️" : "❌"} />
+                <Item label="検査結果" value={inspectionRecord.inspection_result} />
                 {inspectionRecord.situation_measures && (
                     <Item label="状況・対策等" value={inspectionRecord.situation_measures} />
                 )}
