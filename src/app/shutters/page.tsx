@@ -24,7 +24,7 @@ const ShuttersPage = () => {
             setSiteName(site.name);
         }
         fetchSites();
-    }, []);    
+    }, []);
 
     useEffect(() => {
         if (siteId) {

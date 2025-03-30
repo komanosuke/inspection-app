@@ -32,7 +32,14 @@ export function useInspectionRecords() {
         try {
             const { data, error } = await supabase.from("inspection_records").insert([record]).select("*");
 
-            if (error) throw error;
+            // UNIQUE制約違反のエラーハンドリング
+            if (error) {
+                if (error.code === "23505") {
+                    console.warn("⚠️ すでに登録されているためスキップ:", record);
+                    return { success: false, message: "すでに登録されています。" };
+                }
+                throw error;
+            }
 
             setInspectionRecords((prev) => (prev ? [...prev, data[0]] : [data[0]]));
             return { success: true, data };
@@ -43,7 +50,7 @@ export function useInspectionRecords() {
 
     const updateInspectionRecord = async (id: string, updatedData: Partial<InspectionRecord>) => {
         try {
-            const { data, error } = await supabase.from("inspection_records").update(updatedData).eq("id", id);
+            const { data, error } = await supabase.from("inspection_records").update(updatedData).eq("id", id).select("*");
             if (error) throw error;
             setInspectionRecords((prev) =>
                 prev ? prev.map((r) => (r.id === id ? { ...r, ...updatedData } : r)) : null

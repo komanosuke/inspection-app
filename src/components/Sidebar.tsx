@@ -100,11 +100,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, myCompanyType }) =
                     <>
                         <nav className="mb-8">
                             <ul>
-                                <NavItem icon="📊" label="ダッシュボード" href="/" />
+                                <NavItem icon="📋" label="検査記録作成" href="/" />
 
                                 <NavItem icon="🏢" label="設定・管理" href="/profile" />
-
-                                <NavItem icon="📋" label="検査記録作成" href="/inspection_records/new" />
                             </ul>
                         </nav>
                         <Logout />

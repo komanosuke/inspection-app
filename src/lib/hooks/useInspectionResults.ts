@@ -31,7 +31,14 @@ export function useInspectionResults() {
     const createInspectionResult = async (result: InspectionResult) => {
         try {
             const { data, error } = await supabase.from("inspection_results").insert([result]).select("*");
-            if (error) throw error;
+            // UNIQUE制約違反のエラーハンドリング
+            if (error) {
+                if (error.code === "23505") {
+                    console.warn("⚠️ すでに登録されているためスキップ:", result);
+                    return { success: false, message: "すでに登録されています。" };
+                }
+                throw error;
+            }
 
             setInspectionResults((prev) => (prev ? [...prev, data[0]] : [data[0]]));
             return { success: true, data };
@@ -68,6 +75,7 @@ export function useInspectionResults() {
 
     return {
         inspectionResults,
+        setInspectionResults,
         fetchInspectionResults,
         createInspectionResult,
         updateInspectionResult,

@@ -7,7 +7,7 @@ type Props = {
     onChange: (index: number, updated: Partial<InspectionResult>) => void;
 };
 
-const InspectionResultRegisterFrom: React.FC<Props> = ({ index, result, onChange }) => {
+const InspectionResultRegisterForm: React.FC<Props> = ({ index, result, onChange }) => {
     // ✅ 入力変更時のハンドラー
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type, checked } = e.target;
@@ -104,4 +104,4 @@ const InspectionResultRegisterFrom: React.FC<Props> = ({ index, result, onChange
     );
 };
 
-export default InspectionResultRegisterFrom;
+export default InspectionResultRegisterForm;

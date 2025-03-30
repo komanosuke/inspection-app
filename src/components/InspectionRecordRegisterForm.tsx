@@ -1,47 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
-// import { useInspectionRecords } from "@/lib/hooks/useInspectionRecords";
+import React, { useState, useEffect } from "react";
 import InspectionResultOrganizer from "./InspectionResultOrganizer";
 import { InspectionRecord } from "@/types/inspection_record";
 import { InspectionResult } from "@/types/inspection_result";
+import { useSites } from "@/lib/hooks/useSites";
+import { useShutters } from "@/lib/hooks/useShutters";
+import { useInspectors } from "@/lib/hooks/useInspectors";
+import { useInspectionRecords } from "@/lib/hooks/useInspectionRecords";
+import { useInspectionResults } from "@/lib/hooks/useInspectionResults";
 import { inspectionItems } from "@/data/inspectionItems";
 
 const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
-    const inspectors = [
-        {
-            "id": "929e0448-ac6c-4457-8587-3d6d12c9a0c1",
-            "company_id": "400f5f74-4d7b-42f6-9ce4-52f79916d285",
-            "name": "山田 太郎1",
-            "inspector_number": "1234",
-            "created_at": "2025-03-12T11:50:26.992Z",
-            "updated_at": "2025-03-12T11:50:26.997Z"
-        },
-        {
-            "id": "2e14e247-9cfa-4a0a-8f0b-bb26dd866e9b",
-            "company_id": "400f5f74-4d7b-42f6-9ce4-52f79916d285",
-            "name": "山田 太郎2",
-            "furigana": "やまだ2",
-            "inspector_number": "1234",
-            "created_at": "2025-03-12T11:50:26.992Z",
-            "updated_at": "2025-03-12T11:50:26.997Z"
-        },
-        {
-            "id": "a3b8b26a-2f01-43c8-9020-d0a7b1508691",
-            "company_id": "400f5f74-4d7b-42f6-9ce4-52f79916d285",
-            "name": "山田 太郎3",
-            "inspector_number": "1234",
-            "created_at": "2025-03-12T11:50:26.992Z",
-            "updated_at": "2025-03-12T11:50:26.997Z"
-        }
-    ];
-    // const { createInspectionRecord, updateInspectionRecord, deleteInspectionRecord } = useInspectionRecords();
+    const { createInspectionRecord } = useInspectionRecords();
+    const { createInspectionResult } = useInspectionResults();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const companyId = localStorage.getItem("user_id") || "";
-
+    const [siteId, setSiteId] = useState<string | null>(null);
+    const [shutterId, setShutterId] = useState<string | null>(null);
+    const { fetchSites, sites } = useSites();
+    const { fetchShutters, shutters } = useShutters();
+    const { fetchInspectors, inspectors } = useInspectors();
+    const today = new Date().toISOString().split("T")[0];
+    const [formData, setFormData] = useState<InspectionRecord>({
+        shutter_id: shutterId,
+        inspection_date: today, // YYYY-MM-DD
+        lead_inspector: "",
+        sub_inspector_1: "",
+        sub_inspector_2: ""
+    });
     const [inspectionResults, setInspectionResults] = useState<InspectionResult[]>(
         inspectionItems.map((item, index) => ({
+            inspection_record_id: null,
             inspection_number: `No.${index + 1}`,
             main_category: item.main_category,
             sub_category: item.sub_category || "",
@@ -53,21 +43,26 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
         }))
     );
 
+    useEffect(() => {
+        fetchSites();
+        fetchInspectors();
+        const site_id = localStorage.getItem("site_id");
+        setSiteId(site_id);
+        const shutter_id = localStorage.getItem("shutter_id");
+        setShutterId(shutter_id);
+    }, []);
+
+    useEffect(() => {
+        if (siteId) {
+            fetchShutters(undefined, siteId);
+        }
+    }, [siteId]);
+
     const handleResultChange = (index: number, updated: Partial<InspectionResult>) => {
         const newResults = [...inspectionResults];
         newResults[index] = { ...newResults[index], ...updated };
         setInspectionResults(newResults);
     };
-
-    const today = new Date().toISOString().split("T")[0];
-
-    const [formData, setFormData] = useState<InspectionRecord>({
-        shutter_id: companyId,
-        inspection_date: today, // YYYY-MM-DD
-        lead_inspector: "",
-        sub_inspector_1: "",
-        sub_inspector_2: ""
-    });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
@@ -86,134 +81,238 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-    
-        // try {
-        //     console.log(formData);
-    
-        //     // ✅ まず "保存失敗" として Supabase に inspectionRecord を登録
-        //     const initialInspectionRecordData = { ...formData, face_image_url: "保存失敗" };
-        //     console.log("🟢 1. 仮のデータを Supabase に登録:", JSON.stringify(initialInspectionRecordData, null, 2));
+        try {
+            // ✅ サニタイズ処理
+            const sanitizedFormData = {
+                ...formData,
+                shutter_id: shutterId, // ✅ shutterId も登録
+            };
+            console.log(sanitizedFormData);
 
-        //     const sanitizedFormData = {
-        //         ...formData,
-        //         inspection_date: formData.inspection_date || null,
-        //     };
+            // ✅ 検査記録の作成
+            const createResult = await createInspectionRecord(sanitizedFormData);
     
-        //     const createResult = await createInspectionRecord(sanitizedFormData);
+            if (!createResult.success) {
+                throw new Error(`Supabase 登録に失敗: ${createResult.error}`);
+            }
     
-        //     if (!createResult.success) {
-        //         throw new Error(`Supabase 登録に失敗: ${createResult.error}`);
-        //     }
-    
-        //     const inspectionRecordId = createResult.data[0]?.id;
-        //     if (!inspectionRecordId) {
-        //         throw new Error("Supabase の登録データから inspectionRecordId を取得できませんでした");
-        //     }
-    
-        //     console.log(`🟢 2. inspectionRecordId: ${inspectionRecordId} が登録完了`);
+            alert("新規の検査記録を登録しました。");
+
+            // ✅ 登録された検査記録のIDを取得
+            const recordId = createResult.data[0].id;
+
+            console.log(createResult.data[0]);
+
+            // ✅ inspectionResults に inspection_record_id をセット
+            const resultsToInsert = inspectionResults.map((result) => ({
+                ...result,
+                inspection_record_id: recordId,
+            }));
+
+            console.log(resultsToInsert);
+
+            // ✅ 検査結果の登録（ループで一括登録）
+            const resultPromises = resultsToInsert.map((result) => createInspectionResult(result));
+
+            // ✅ すべての結果を並列処理
+            const resultResponses = await Promise.all(resultPromises);
+
+            // ✅ 失敗した結果をチェック
+            const failedResults = resultResponses.filter((res) => !res.success);
+            if (failedResults.length > 0) {
+                console.warn(`⚠️ 一部の検査結果登録に失敗しました (${failedResults.length} 件)。`);
+            }
+
+            alert("✅ 検査記録と検査結果の登録が完了しました。");
             
-        //     // ✅ 成功したらモーダルを閉じる
-        //     onClose();
-        //     window.location.reload()        
-        // } catch (err: any) {
-        //     console.error("🔴 エラー:", err);
-        //     setError(err.message);
-        // } finally {
-        //     setLoading(false);
-        // }
-    };    
-    
+            // ✅ 成功したらモーダルを閉じる
+            onClose();
+            window.location.reload();
+        } catch (err: any) {
+            console.error("🔴 エラー:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ✅ サイト変更時の関数
+    const handleSiteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedSiteId = e.target.value;
+        setSiteId(selectedSiteId); // ✅ State を更新
+        localStorage.setItem("site_id", selectedSiteId); // ✅ localStorage に保存
+    };
+
+    // ✅ シャッター変更時の関数
+    const handleShutterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedShutterId = e.target.value;
+        setShutterId(selectedShutterId); // ✅ State を更新
+        localStorage.setItem("shutter_id", selectedShutterId); // ✅ localStorage に保存
+    };
 
     return (
-        <div className="md:p-6">
+        <div className="">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">検査記録作成</h1>
             </div>
 
-            <form onSubmit={handleSubmit}>
-
-                <p>現場選択</p>
-                <p>シャッター選択</p>
-
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="inspection_date">検査日（必須）</label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="date" id="inspection_date" value={formData.inspection_date} onChange={handleChange} required />
+            {/* ✅ 現場が登録されていない場合 */}
+            {!sites || sites.length === 0 ? (
+                <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
+                    📂 現場が登録されていません。<br />
+                    <a href="/sites" className="text-blue-500 hover:underline">
+                        現場を登録する
+                    </a>
                 </div>
-
+            ) : (
                 <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="lead_inspector">
-                        代表検査者（必須）
+                    <label className="block font-bold mb-2" htmlFor="site_id">
+                        現場（必須）
                     </label>
                     <select
                         className="w-full px-4 py-2 border rounded-lg"
-                        id="lead_inspector"
-                        value={formData.lead_inspector}
-                        onChange={handleChange}
+                        id="site_id"
+                        value={siteId || ""}
+                        onChange={handleSiteChange}
                         required
                     >
-                        <option value="">検査者を選択してください</option>
-                        {inspectors.map((inspector) => (
-                        <option key={inspector.id} value={inspector.name}>
-                            {inspector.name}
-                        </option>
+                        <option value="">現場を選択してください</option>
+                        {sites.map((site) => (
+                            <option key={site.id} value={site.id}>
+                                {site.name}
+                            </option>
                         ))}
                     </select>
                 </div>
+            )}
 
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="sub_inspector_1">
-                        検査者1
-                    </label>
-                    <select
-                        className="w-full px-4 py-2 border rounded-lg"
-                        id="sub_inspector_1"
-                        value={formData.sub_inspector_1}
-                        onChange={handleChange}
-                    >
-                        <option value="">検査者を選択してください（任意）</option>
-                        {inspectors.map((inspector) => (
-                        <option key={inspector.id} value={inspector.name}>
-                            {inspector.name}
-                        </option>
-                        ))}
-                    </select>
+            {/* ✅ シャッターが登録されていない場合 */}
+            {siteId && (!shutters || shutters.length === 0) ? (
+                <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
+                    📂 シャッターが登録されていません。<br />
+                    <a href="/shutters" className="text-blue-500 hover:underline">
+                        シャッターを登録する
+                    </a>
                 </div>
+            ) : (
+                siteId && (
+                    <div className="mb-4">
+                        <label className="block font-bold mb-2" htmlFor="shutter_id">
+                            シャッター（必須）
+                        </label>
+                        <select
+                            className="w-full px-4 py-2 border rounded-lg"
+                            id="shutter_id"
+                            value={shutterId || ""}
+                            onChange={handleShutterChange}
+                            required
+                        >
+                            <option value="">シャッターを選択してください</option>
+                            {shutters?.map((shutter) => (
+                                <option key={shutter.id} value={shutter.id}>
+                                    {shutter.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )
+            )}
 
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="sub_inspector_2">
-                        検査者2
-                    </label>
-                    <select
-                        className="w-full px-4 py-2 border rounded-lg"
-                        id="sub_inspector_2"
-                        value={formData.sub_inspector_2}
-                        onChange={handleChange}
-                    >
-                        <option value="">検査者を選択してください（任意）</option>
-                        {inspectors.map((inspector) => (
-                        <option key={inspector.id} value={inspector.name}>
-                            {inspector.name}
-                        </option>
-                        ))}
-                    </select>
-                </div>
+            {/* ✅ 現場とシャッターが選択されている場合のみフォーム表示 */}
+            {siteId && shutterId && (
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label className="block font-bold mb-2" htmlFor="inspection_date">検査日（必須）</label>
+                        <input className="w-full px-4 py-2 border rounded-lg" type="date" id="inspection_date" value={formData.inspection_date} onChange={handleChange} required />
+                    </div>
 
+                    {!inspectors || inspectors.length === 0 ? (
+                        <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
+                            📂 検査者が登録されていません。<br />
+                            <a href="/inspectors" className="text-blue-500 hover:underline">
+                                検査者を登録する
+                            </a>
+                        </div>
+                    ) : (
+                        <>
 
-                <div className="mb-4">
-                    <label className="block font-bold mb-2">
-                        検査項目
-                    </label>
-                    {/* ✅ 大項目・小項目の整理コンポーネント */}
-                    <InspectionResultOrganizer
-                        inspectionResults={inspectionResults}
-                        onResultChange={handleResultChange}
-                    />
-                </div>
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2" htmlFor="lead_inspector">
+                                    代表検査者（必須）
+                                </label>
+                                <select
+                                    className="w-full px-4 py-2 border rounded-lg"
+                                    id="lead_inspector"
+                                    value={formData.lead_inspector}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">検査者を選択してください</option>
+                                    {inspectors.map((inspector) => (
+                                        <option key={inspector.id} value={inspector.name}>
+                                            {inspector.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                <div className="flex justify-end">
-                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">登録</button>
-                </div>
-            </form>
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2" htmlFor="sub_inspector_1">
+                                    検査者1
+                                </label>
+                                <select
+                                    className="w-full px-4 py-2 border rounded-lg"
+                                    id="sub_inspector_1"
+                                    value={formData.sub_inspector_1}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">検査者を選択してください（任意）</option>
+                                    {inspectors.map((inspector) => (
+                                    <option key={inspector.id} value={inspector.name}>
+                                        {inspector.name}
+                                    </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2" htmlFor="sub_inspector_2">
+                                    検査者2
+                                </label>
+                                <select
+                                    className="w-full px-4 py-2 border rounded-lg"
+                                    id="sub_inspector_2"
+                                    value={formData.sub_inspector_2}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">検査者を選択してください（任意）</option>
+                                    {inspectors.map((inspector) => (
+                                    <option key={inspector.id} value={inspector.name}>
+                                        {inspector.name}
+                                    </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block font-bold mb-2">
+                                    検査項目
+                                </label>
+                                {/* ✅ 大項目・小項目の整理コンポーネント */}
+                                <InspectionResultOrganizer
+                                    inspectionResults={inspectionResults}
+                                    onResultChange={handleResultChange}
+                                />
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">登録</button>
+                            </div>
+
+                        </>
+                    )}
+                </form>
+            )}
         </div>
     );
 };

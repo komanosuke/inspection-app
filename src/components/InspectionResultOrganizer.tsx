@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import InspectionResultRegisterFrom from "./InspectionResultRegisterFrom";
+import InspectionResultRegisterForm from "./InspectionResultRegisterForm";
 import { InspectionResult } from "@/types/inspection_result";
 
 type Props = {
@@ -65,6 +65,7 @@ const InspectionResultOrganizer: React.FC<Props> = ({ inspectionResults, onResul
                 <div key={index} className="mb-4 border-b border-gray-300">
                     {/* ✅ 大項目ボタン */}
                     <button
+                        type="button"
                         onClick={() => toggleMainCategory(main)}
                         className="w-full text-left px-4 py-2 bg-gray-100 hover:bg-gray-200 font-bold"
                     >
@@ -79,6 +80,7 @@ const InspectionResultOrganizer: React.FC<Props> = ({ inspectionResults, onResul
                                     {/* ✅ 小項目ボタン（小項目がある場合のみ） */}
                                     {sub !== "_no_sub" ? (
                                         <button
+                                            type="button"
                                             onClick={() => toggleSubCategory(sub)}
                                             className="w-full text-left px-4 py-2 bg-gray-200 hover:bg-gray-300"
                                         >
@@ -90,7 +92,7 @@ const InspectionResultOrganizer: React.FC<Props> = ({ inspectionResults, onResul
                                     {(sub === "_no_sub" || expandedSub === sub) && (
                                         <div className="bg-gray-100">
                                             {groupedByMain[main][sub].map((result, resultIndex) => (
-                                                <InspectionResultRegisterFrom
+                                                <InspectionResultRegisterForm
                                                     key={resultIndex}
                                                     index={resultIndex}
                                                     result={result}
