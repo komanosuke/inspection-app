@@ -1,11 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Modal from "@/components/Modal";
+import { useSites } from "@/lib/hooks/useSites";
+import SiteEditForm from "@/components/SiteEditForm";
 import { useSiteCompanies } from "@/lib/hooks/useSiteCompanies";
 
-const SitesTable = ({ sites }) => {
+const SitesTable = ({ sites, company, permittedCompanies }) => {
     const { fetchSiteCompanies, siteCompanies } = useSiteCompanies();
     const [siteData, setSiteData] = useState([]);
+    const [isSiteEditModalOpen, setIsSiteEditModalOpen] = useState(false);
+    const [selectedSite, setSelectedSite] = useState(null);
+    const { deleteSite } = useSites();
 
     // 初回マウント時に `fetchSiteCompanies` を実行
     useEffect(() => {
@@ -30,10 +36,49 @@ const SitesTable = ({ sites }) => {
         });
     
         setSiteData(updatedSites);
-    }, [siteCompanies, sites]);    
+    }, [siteCompanies, sites]);
+
+    // ✅ モーダル表示ハンドラー
+    const handleViewRecordEdit = (record) => {
+        setSelectedSite(record);
+        setIsSiteEditModalOpen(true);
+    };
+
+    // ✅ 削除ハンドラー
+    const handleDeleteRecord = async (id) => {
+        const isConfirmed = confirm("本当にこの現場を削除しますか？");
+        if (!isConfirmed) return;
+
+        try {
+            const result = await deleteSite(id);
+
+            if (result.success) {
+                alert("✅ 現場を削除しました。");
+                window.location.reload();
+            } else {
+                alert(`⚠️ 削除に失敗しました: ${result.error}`);
+            }
+        } catch (error) {
+            console.error("削除エラー:", error);
+            alert("⚠️ 削除時にエラーが発生しました。");
+        }
+    };
 
     return (
         <div className="">
+            <Modal
+                isOpen={isSiteEditModalOpen}
+                onClose={() => setIsSiteEditModalOpen(false)}
+            >
+                {selectedSite && (
+                    <SiteEditForm
+                        site={selectedSite}
+                        company={company}
+                        permittedCompanies={permittedCompanies}
+                        onClose={() => setIsSiteEditModalOpen(false)}
+                    />
+                )}
+            </Modal>
             <div className="flex text-xs md:text-base">
                 <table className="border-collapse border border-gray-300 text-center">
                     <thead className="text-gray-700">
@@ -51,7 +96,22 @@ const SitesTable = ({ sites }) => {
                                             {index+1}
                                         </div>
                                         <div className="text-center px-2 flex-1 flex items-center justify-center">
-                                            👀 ✏️ 🗑️
+                                            {/* ✏️ 編集ボタン（未実装） */}
+                                            <button
+                                                className="block ml-2 text-yellow-500 hover:text-yellow-700 text-lg"
+                                                title="編集"
+                                                onClick={() => handleViewRecordEdit(site)}
+                                            >
+                                                ✏️
+                                            </button>
+                                            {/* 🗑️ 削除ボタン（未実装） */}
+                                            <button
+                                                className="block ml-2 text-red-500 hover:text-red-700 text-lg"
+                                                title="削除"
+                                                onClick={() => handleDeleteRecord(site.id)}
+                                            >
+                                                🗑️
+                                            </button>
                                         </div>
                                     </div>
                                 </td>

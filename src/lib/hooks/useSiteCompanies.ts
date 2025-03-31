@@ -19,10 +19,8 @@ export function useSiteCompanies() {
             } else if (companyId) {
                 query = query.eq("company_id", companyId);
             }
-            console.log(query);
 
             const { data, error } = await query;
-            console.log(data);
             if (error) throw error;
             setSiteCompanies(Array.isArray(data) ? data : [data]);
         } catch (error: any) {
@@ -52,22 +50,22 @@ export function useSiteCompanies() {
         }
     };
 
-    const updateSiteCompany = async (recordId: string, updatedData: Partial<SiteCompany>) => {
+    const updateSiteCompany = async (id: string, updatedData: Partial<SiteCompany>) => {
         try {
-            const { data, error } = await supabase.from("site_companies").update(updatedData).eq("id", recordId);
+            const { data, error } = await supabase.from("site_companies").update(updatedData).eq("id", id);
             if (error) throw error;
-            setSiteCompanies((prev) => prev ? prev.map((s) => (s.id === recordId ? { ...s, ...updatedData } : s)) : null);
+            setSiteCompanies((prev) => prev ? prev.map((s) => (s.id === id ? { ...s, ...updatedData } : s)) : null);
             return { success: true, data };
         } catch (error: any) {
             return { success: false, error: error.message };
         }
     };
 
-    const deleteSiteCompany = async (recordId: string) => {
+    const deleteSiteCompany = async (id: string) => {
         try {
-            const { data, error } = await supabase.from("site_companies").delete().eq("id", recordId);
+            const { data, error } = await supabase.from("site_companies").delete().eq("id", id);
             if (error) throw error;
-            setSiteCompanies((prev) => (prev ? prev.filter((s) => s.id !== recordId) : null));
+            setSiteCompanies((prev) => (prev ? prev.filter((s) => s.id !== id) : null));
             return { success: true, data };
         } catch (error: any) {
             return { success: false, error: error.message };

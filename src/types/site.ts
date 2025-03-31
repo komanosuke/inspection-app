@@ -1,6 +1,6 @@
 export type Site = {
     id: string;
-    company_id?: string | null;
+    company_id: string;
     name: string;
     owner_name: string;
     address: string;

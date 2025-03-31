@@ -17,7 +17,7 @@ return (
             className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40"
             onClick={handleOverlayClick}
         >
-            <div className="bg-white rounded-lg shadow-lg w-[90%] md:w-1/2 relative">
+            <div className="bg-white rounded-lg shadow-lg w-[90%] md:w-2/3 relative">
                 {/* 固定する✖ボタン */}
                 <div className="absolute top-0 right-0 z-50">
                     <button onClick={onClose} className="text-gray-600 hover:text-gray-900 p-2">

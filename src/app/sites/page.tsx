@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import LoginCheck from "@/components/LoginCheck";
+import PageLockGuard from "@/components/PageLockGuard";
 import SitesTable from "@/components/SitesTable";
 import Modal from "@/components/Modal";
 import SiteRegisterForm from "@/components/SiteRegisterForm";
@@ -57,47 +58,55 @@ const SitesPage = () => {
 
     return (
         <LoginCheck>
-            <div className="bg-white p-4 md:p-8 shadow rounded-lg">
-                <div className="sm:flex justify-between items-center mb-4">
-                    <h1 className="text-xl font-bold mb-2 sm:mb-0">現場一覧</h1>
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    >
-                        ＋ 新規作成
-                    </button>
-                </div>
-
-                {/* 🔄 ローディング表示 */}
-                {companyLoading && <></>}
-                {sitesLoading && <div className="text-center p-6">🔄 現場データを取得中...</div>}
-
-                {/* ✅ 会社情報がない場合の警告メッセージ */}
-                {!companyLoading && !myCompany && (
-                    <div className="text-center text-red-500 p-4 border border-red-500 rounded-md">
-                        会社情報が登録されていません。<br />
-                        <a href="/profile" className="text-blue-500 hover:underline">会社情報を登録する</a>
+            <PageLockGuard
+                company={myCompany}
+            >
+                <div className="bg-white p-4 md:p-8 shadow rounded-lg">
+                    <div className="sm:flex justify-between items-center mb-4">
+                        <h1 className="text-xl font-bold mb-2 sm:mb-0">現場一覧</h1>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        >
+                            ＋ 新規作成
+                        </button>
                     </div>
-                )}
 
-                {/* ✅ 現場一覧テーブル */}
-                {!sitesLoading && sites && sites.length > 0 ? (
-                    <SitesTable sites={sites} />
-                ) : (
-                    !sitesLoading && (
-                        <div className="text-center p-6">📂 現場データがありません</div>
-                    )
-                )}
+                    {/* 🔄 ローディング表示 */}
+                    {companyLoading && <></>}
+                    {sitesLoading && <div className="text-center p-6">🔄 現場データを取得中...</div>}
 
-                {/* モーダル（新規登録） */}
-                <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <SiteRegisterForm 
-                        company={myCompany}
-                        permittedCompanies={permittedCompanies} // 自分以外の許可された会社一覧を渡す
-                        onClose={() => setIsModalOpen(false)} 
-                    />
-                </Modal>
-            </div>
+                    {/* ✅ 会社情報がない場合の警告メッセージ */}
+                    {!companyLoading && !myCompany && (
+                        <div className="text-center text-red-500 p-4 border border-red-500 rounded-md">
+                            会社情報が登録されていません。<br />
+                            <a href="/profile" className="text-blue-500 hover:underline">会社情報を登録する</a>
+                        </div>
+                    )}
+
+                    {/* ✅ 現場一覧テーブル */}
+                    {!sitesLoading && sites && sites.length > 0 ? (
+                        <SitesTable
+                            sites={sites}
+                            company={myCompany}
+                            permittedCompanies={permittedCompanies}
+                        />
+                    ) : (
+                        !sitesLoading && (
+                            <div className="text-center p-6">📂 現場データがありません</div>
+                        )
+                    )}
+
+                    {/* モーダル（新規登録） */}
+                    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                        <SiteRegisterForm 
+                            company={myCompany}
+                            permittedCompanies={permittedCompanies} // 自分以外の許可された会社一覧を渡す
+                            onClose={() => setIsModalOpen(false)} 
+                        />
+                    </Modal>
+                </div>
+            </PageLockGuard>
         </LoginCheck>
     );
 };

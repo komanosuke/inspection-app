@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import InspectionResultOrganizer from "./InspectionResultOrganizer";
+import InspectionResultEditOrganizer from "./InspectionResultEditOrganizer";
 import { InspectionRecord } from "@/types/inspection_record";
 import { InspectionResult } from "@/types/inspection_result";
 import { useInspectors } from "@/lib/hooks/useInspectors";
@@ -22,6 +22,8 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
         sub_inspector_1: "",
         sub_inspector_2: "",
     });
+    const [originalResults, setOriginalResults] = useState<InspectionResult[]>([]);
+    const [editResults, setEditResults] = useState<InspectionResult[]>([]);
 
     useEffect(() => {
         fetchInspectors();
@@ -37,11 +39,10 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
     useEffect(() => {
         if (inspectionResults && inspectionResults.length > 0) {
             const sortedResults = sortInspectionResults(inspectionResults);
-    
-            // ✅ ソート後のデータが変わっていたらだけ更新
-            if (JSON.stringify(sortedResults) !== JSON.stringify(inspectionResults)) {
-                setInspectionResults(sortedResults);
-            }
+            // ✅ originalResults にデータ保存
+            setOriginalResults(sortedResults);
+            // ✅ 編集用にコピーしたデータをセット
+            setEditResults([...sortedResults]);
         }
     }, [inspectionResults]);
     
@@ -57,16 +58,17 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
     };    
 
     const handleResultChange = (index: number, updated: Partial<InspectionResult>) => {
-        const newResults = [...inspectionResults];
+        const newResults = [...editResults];
         newResults[index] = { ...newResults[index], ...updated };
+    
         // ✅ 変更後の結果を並び替え
         const sortedResults = sortInspectionResults(newResults);
-
+    
         // ✅ 変更があった場合のみセット
-        if (JSON.stringify(sortedResults) !== JSON.stringify(inspectionResults)) {
-            setInspectionResults(sortedResults);
+        if (JSON.stringify(sortedResults) !== JSON.stringify(editResults)) {
+            setEditResults(sortedResults);
         }
-    };
+    };    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
@@ -103,15 +105,15 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
 
             console.log(updateResult.data[0]);
 
-            // ✅ inspectionResults に inspection_record_id をセット
-            const resultsToInsert = inspectionResults.map((result) => ({
-                ...result,
-                inspection_record_id: inspectionRecord.id,
-            }));
+            // ✅ 変更があった inspectionResults だけを抽出
+            const changedResults = editResults.filter((result, index) => {
+                return JSON.stringify(result) !== JSON.stringify(originalResults[index]);
+            });
 
-            // ✅ 検査結果の更新（ループで一括更新）
-            const resultPromises = inspectionResults.map((result) => {
-                console.log(result.id);
+            console.log(changedResults);
+
+            // ✅ 変更があった結果だけ更新
+            const resultPromises = changedResults.map((result) => {
                 if (result.id) {
                     // ✅ result.id がある場合は更新
                     return updateInspectionResult(result.id, result);
@@ -232,8 +234,8 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                             </label>
                             {/* ✅ 大項目・小項目の整理コンポーネント */}
                             { inspectionResults && inspectionResults.length > 0 ? (
-                                <InspectionResultOrganizer
-                                    inspectionResults={inspectionResults}
+                                <InspectionResultEditOrganizer
+                                    inspectionResults={editResults}
                                     onResultChange={handleResultChange}
                                 />
                             ) : (

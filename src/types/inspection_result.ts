@@ -1,5 +1,6 @@
 export type InspectionResult = {
     id?: string;
+    company_id: string;
     inspection_record_id?: string | null;
     inspection_number: string;
     main_category: string;

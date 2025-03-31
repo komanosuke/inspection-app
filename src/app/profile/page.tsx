@@ -8,6 +8,7 @@ import CompanyForPermissionSelection from "@/components/CompanyForPermissionSele
 import { useCompanies } from "@/lib/hooks/useCompanies";
 import { useCompanyPermissions } from "@/lib/hooks/useCompanyPermissions";
 import { Company } from "@/types/company";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 export default function ProfilePage() {
     const [form, setForm] = useState({
@@ -25,6 +26,11 @@ export default function ProfilePage() {
 
     const [selectedCompanies, setSelectedCompanies] = useState<Company[]>([]);
     const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
+    // ✅ パスワードの表示/非表示トグル状態
+    const [showPassword, setShowPassword] = useState(false);
+    // ✅ パスワード変更フラグ
+    const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
+
 
     const { fetchCompanies, fetchMyCompany, createCompany, updateCompany, myCompany, companies } = useCompanies();
     const { fetchMyCompanyPermissions, createCompanyPermission, updateCompanyPermission, deleteCompanyPermission, myCompanyPermissions } = useCompanyPermissions();
@@ -39,7 +45,6 @@ export default function ProfilePage() {
         }
         setUserCompanyId(user_id);
 
-        console.log("✅ ローカルストレージから取得したユーザーID:", user_id);
         setForm((prev) => ({ ...prev, id: user_id }));
 
         fetchMyCompany(user_id);
@@ -80,6 +85,10 @@ export default function ProfilePage() {
         if (!form.name.trim()) newErrors.name = "会社名を入力してください。";
         if (!form.representative_name.trim()) newErrors.representative_name = "代表者名を入力してください。";
         if (!form.type?.trim()) newErrors.type = "契約形態を選択してください。";
+        // ✅ 協力会社の場合、選択された会社があるか確認
+        if (form.type === "協力会社" && selectedCompanies.length === 0) {
+            newErrors.selectedCompanies = "協力会社の場合、少なくとも1つの会社を選択してください。";
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0; // ✅ エラーがなければ true を返す
     };
@@ -97,8 +106,14 @@ export default function ProfilePage() {
         console.log("📤 送信データ:", form);
         const action = isRegistered ? updateCompany : createCompany;
 
+        // ✅ パスワードが空の場合、更新データから除外
+        const updatedData = { ...form };
+        if (isRegistered && !form.page_lock_password) {
+            delete updatedData.page_lock_password;
+        }
+
         try {
-            const { success, error } = isRegistered ? await action(form.id, form) : await action(form);
+            const { success, error } = isRegistered ? await action(form.id, updatedData) : await action(form);
 
             if (!success) {
                 throw new Error(error || "エラーが発生しました");
@@ -248,27 +263,66 @@ export default function ProfilePage() {
 
                             {form.type === "協力会社" && (
                                 <CompanyForPermissionSelection
-                                    availableCompanies={companies || []}
                                     selectedCompanies={selectedCompanies}
                                     setSelectedCompanies={setSelectedCompanies}
                                 />
                             )}
+                            {errors.selectedCompanies && <p className="text-red-500 text-sm mb-4">{errors.selectedCompanies}</p>}
 
-                            <div className="mb-4">
-                                <label className="block font-bold mb-2">設定・管理ページのページロックパスワード（必須）</label>
-                                <input
-                                    type="text"
-                                    name="page_lock_password"
-                                    value={form.page_lock_password}
-                                    onChange={(e) => handlePasswordChange(e.target.value)}
-                                    className="w-full p-2 border rounded"
-                                    placeholder="半角英数6文字以上20文字以内"
-                                    minLength={6}
-                                    maxLength={20}
-                                    pattern="[A-Za-z0-9]{6,20}"
-                                    required
-                                />
-                                {errors.page_lock_password && <p className="text-red-500 text-sm">{errors.page_lock_password}</p>}
+                            <div className="mb-4 relative">
+                                <div className="flex items-center justify-between">
+                                    <label className="block font-bold mb-2">
+                                        {isRegistered
+                                            ? "設定・管理ページのページロックパスワード（任意変更）"
+                                            : "設定・管理ページのページロックパスワード（必須）"}
+                                    </label>
+                                    {isRegistered && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsEditingPassword(!isEditingPassword);
+                                                if (!isEditingPassword) {
+                                                    // ✅ 編集開始時に値をリセット
+                                                    setForm({ ...form, page_lock_password: "" });
+                                                }
+                                            }}
+                                            className="text-sm text-blue-500 underline"
+                                        >
+                                            {isEditingPassword ? "キャンセル" : "変更する"}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {(!isRegistered || isEditingPassword) && (
+                                    <>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            name="page_lock_password"
+                                            value={form.page_lock_password || ""}
+                                            onChange={(e) => handlePasswordChange(e.target.value)}
+                                            className="w-full p-2 border rounded"
+                                            placeholder="半角英数6文字以上20文字以内"
+                                            minLength={6}
+                                            maxLength={20}
+                                            pattern="[A-Za-z0-9]{6,20}"
+                                            required={!isRegistered} // ✅ 新規登録の場合のみ必須
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-10 text-gray-500"
+                                        >
+                                            {showPassword ? (
+                                                <EyeSlashIcon className="w-5 h-5" />
+                                            ) : (
+                                                <EyeIcon className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                        {errors.page_lock_password && (
+                                            <p className="text-red-500 text-sm">{errors.page_lock_password}</p>
+                                        )}
+                                    </>
+                                )}
                             </div>
 
                             <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
@@ -278,38 +332,59 @@ export default function ProfilePage() {
                     )}
                 </div>
 
-                <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
-                    <div className="text-xl font-bold mb-4">管理ページへのリンク</div>
-                    <div className="sm:flex flex-wrap justify-between gap-4">
-                        
-                        {myCompany?.type === "管理会社" && (
-                            <Link
-                                href="/sites"
-                                className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                            >
-                                📍 現場管理
-                            </Link>
+                {!isLoading && (
+                    <>
+                        {!myCompany ? (
+                            <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
+                                <div className="text-xl font-bold mb-4">管理ページへのリンク</div>
+                                <p>会社情報を登録後、表示されます。</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
+                                    {isRegistered && myCompany && myCompany.type === "管理会社" && (
+                                        <div className="">
+                                            <div className="text-xl font-bold mb-4">あなたの会社のID <span className="text-sm text-red-400">※ 協力会社に教えてください。</span></div>
+                                            <p>{myCompany.id}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            
+                                <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
+                                    <div className="text-xl font-bold mb-4">管理ページへのリンク</div>
+                                    <div className="sm:flex flex-wrap justify-between gap-4">
+                                        {myCompany.type === "管理会社" && (
+                                            <Link
+                                                href="/sites"
+                                                className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                                            >
+                                                📍 現場管理
+                                            </Link>
+                                        )}
+                                        <Link
+                                            href="/inspectors"
+                                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                                        >
+                                            👷 検査者管理
+                                        </Link>
+                                        <Link
+                                            href="/shutters"
+                                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                                        >
+                                            🏗️ シャッター管理
+                                        </Link>
+                                        <Link
+                                            href="/inspection_records"
+                                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                                        >
+                                            📋 検査記録管理
+                                        </Link>
+                                    </div>
+                                </div>
+                            </>
                         )}
-                        <Link
-                            href="/inspectors"
-                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                        >
-                            👷 検査者管理
-                        </Link>
-                        <Link
-                            href="/shutters"
-                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                        >
-                            🏗️ シャッター管理
-                        </Link>
-                        <Link
-                            href="/inspection_records"
-                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                        >
-                            📋 検査記録管理
-                        </Link>
-                    </div>
-                </div>
+                    </>
+                )}
             </PageLockGuard>
         </LoginCheck>
     );

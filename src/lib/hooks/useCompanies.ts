@@ -19,10 +19,18 @@ export function useCompanies() {
         try {
             const { data, error } = await supabase
                 .from("companies")
-                .select("*")
+                .select(`
+                    id,
+                    name,
+                    representative_name,
+                    type,
+                    can_access_setting_page,
+                    created_at,
+                    updated_at
+                `)
                 .eq("id", userId)
                 .single();
-
+    
             if (error) throw error;
             setMyCompany(data);
         } catch (error: any) {
@@ -31,6 +39,7 @@ export function useCompanies() {
             setLoading(false);
         }
     };
+    
 
     // // ✅ **自分以外の会社情報を取得**
     // const fetchCompanies = async (excludeId: string) => {
@@ -90,6 +99,26 @@ export function useCompanies() {
         }
     };
 
+    // ✅ **特定の会社情報をIDで取得**
+    const fetchCompanyById = async (companyId: string): Promise<Company | null> => {
+        try {
+            const { data, error } = await supabase
+                .from("companies")
+                .select("id, name, representative_name")
+                .eq("id", companyId)
+                .single();
+
+            if (error) {
+                console.error("❌ 会社情報の取得エラー:", error.message);
+                return null;
+            }
+            return data;
+        } catch (error: any) {
+            console.error("❌ APIエラー:", error.message);
+            return null;
+        }
+    };
+
     const createCompany = async (company: Company) => {
         try {
             const { data, error } = await supabase.from("companies").insert([company]).select("*");;
@@ -123,6 +152,34 @@ export function useCompanies() {
         }
     };
 
+    // ✅ **パスワード照合関数**
+    const checkPageLockPassword = async (userId: string, inputPassword: string): Promise<boolean> => {
+        setLoading(true);
+        setError(null);
+        try {
+            // ✅ `page_lock_password` だけを取得（他の情報は不要）
+            const { data, error } = await supabase
+                .from("companies")
+                .select("page_lock_password")
+                .eq("id", userId)
+                .single();
+
+            if (error) throw error;
+
+            // ✅ パスワードが一致するかチェック
+            if (data?.page_lock_password === inputPassword) {
+                return true; // パスワード一致
+            } else {
+                return false; // パスワード不一致
+            }
+        } catch (error: any) {
+            setError(error.message);
+            return false; // エラー時もfalseを返す
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return { 
         companies, 
         myCompany, 
@@ -130,9 +187,11 @@ export function useCompanies() {
         fetchMyCompany, 
         fetchMyCompanyType,
         fetchCompanies, 
+        fetchCompanyById,
         createCompany, 
         updateCompany, 
         deleteCompany, 
+        checkPageLockPassword,
         loading,
         error 
     };

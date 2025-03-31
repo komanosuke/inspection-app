@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useShutters } from "@/lib/hooks/useShutters";
 import { Shutter } from "@/types/shutter";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -17,9 +17,10 @@ const ShutterRegisterForm = ({
     const { createShutter, updateShutter, deleteShutter } = useShutters();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
+    const userId = localStorage.getItem("user_id");
     const [formData, setFormData] = useState<Shutter>({
-        site_id: siteId || "", // 現場IDに対応（例）
+        site_id: siteId, // 現場IDに対応（例）
+        company_id: userId || "",
         name: "",
         model_number: "",
     });
@@ -44,9 +45,13 @@ const ShutterRegisterForm = ({
     
         try {
             console.log(formData);
+            if (!userId) {
+                alert("ユーザーIDが不明です。処理を実行できません。");
+            }
 
             const sanitizedFormData = {
                 ...formData,
+                company_id: userId,
                 // inspection_date: formData.inspection_date || null,
             };
     

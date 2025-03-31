@@ -1,7 +1,7 @@
-// components/PageLockGuard.tsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Company } from "@/types/company"; // ✅ Company 型のインポート
+import { useCompanies } from "@/lib/hooks/useCompanies"; // ✅ useCompaniesのインポート
 
 interface PageLockGuardProps {
     company: Company | null; // ✅ `myCompany` を受け取る
@@ -11,21 +11,42 @@ interface PageLockGuardProps {
 export default function PageLockGuard({ company, children }: PageLockGuardProps) {
     const [inputPassword, setInputPassword] = useState<string>(""); // ✅ パスワード入力
     const [error, setError] = useState<string>(""); // ✅ エラー管理
+    const [isUnlocked, setIsUnlocked] = useState<boolean>(false); // ✅ ロック解除状態
+    const { checkPageLockPassword } = useCompanies(); // ✅ パスワード照合関数を使用
+
+    // ✅ ページロード時に `localStorage` から解除状態を確認
+    useEffect(() => {
+        const unlocked = localStorage.getItem("pageUnlocked");
+        if (unlocked === "true") {
+            setIsUnlocked(true);
+        }
+    }, []);
 
     // ✅ `company === null` ならロックせず即時表示
     if (!company) {
         return <>{children}</>;
     }
 
-    // ✅ アクセス権限ありなら即時表示
-    if (!company.can_access_setting_page) {
+    // ✅ アクセス権限がなければロック不要
+    if (company.can_access_setting_page) {
         return <>{children}</>;
     }
 
-    // ✅ パスワード一致したらページ表示
-    if (inputPassword === company.page_lock_password) {
+    // ✅ すでにロック解除済みの場合、ページ表示
+    if (isUnlocked) {
         return <>{children}</>;
     }
+
+    // ✅ パスワード送信時の処理
+    const handleUnlock = async () => {
+        const isValid = await checkPageLockPassword(company.id, inputPassword);
+        if (isValid) {
+            setIsUnlocked(true);
+            localStorage.setItem("pageUnlocked", "true"); // ✅ 正しい場合のみローカルストレージに保存
+        } else {
+            setError("パスワードが間違っています");
+        }
+    };
 
     // 🚫 ブロック画面（パスワード入力用）
     return (
@@ -40,6 +61,12 @@ export default function PageLockGuard({ company, children }: PageLockGuardProps)
                     placeholder="パスワードを入力してください"
                 />
                 {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                <button
+                    onClick={handleUnlock}
+                    className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600"
+                >
+                    ロック解除
+                </button>
             </div>
         </div>
     );

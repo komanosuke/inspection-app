@@ -1,5 +1,6 @@
 export type InspectionRecord = {
     id?: string;
+    company_id: string;
     shutter_id?: string | null;
     inspection_date: string; // YYYY-MM-DD
     lead_inspector: string;

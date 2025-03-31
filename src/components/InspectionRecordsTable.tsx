@@ -35,9 +35,7 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
 
             if (result.success) {
                 alert("✅ 検査記録を削除しました。");
-
-                // ✅ records から削除済みデータを除去
-                setRecords(records.filter((record) => record.id !== id));
+                window.location.reload();
             } else {
                 alert(`⚠️ 削除に失敗しました: ${result.error}`);
             }
