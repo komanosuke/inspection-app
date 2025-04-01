@@ -140,25 +140,38 @@ const InspectionRecordsPage = () => {
                         </div>
                     ) : (
                         siteId && (
-                            <div className="mb-4">
-                                <label className="block font-bold mb-2" htmlFor="shutter_id">
-                                    シャッター選択
+                            <>
+                                <div className="mb-4">
+                                    <label className="block font-bold mb-2" htmlFor="shutter_id">
+                                        シャッター選択
+                                    </label>
+                                    <select
+                                        className="w-full px-4 py-2 border rounded-lg"
+                                        id="shutter_id"
+                                        value={shutterId || ""}
+                                        onChange={handleShutterChange}
+                                        required
+                                    >
+                                        <option value="">シャッターを選択してください</option>
+                                        {shutters?.map((shutter) => (
+                                            <option key={shutter.id} value={shutter.id}>
+                                                {shutter.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <label className="block font-bold mb-2">
+                                    検査記録
                                 </label>
-                                <select
-                                    className="w-full px-4 py-2 border rounded-lg"
-                                    id="shutter_id"
-                                    value={shutterId || ""}
-                                    onChange={handleShutterChange}
-                                    required
-                                >
-                                    <option value="">シャッターを選択してください</option>
-                                    {shutters?.map((shutter) => (
-                                        <option key={shutter.id} value={shutter.id}>
-                                            {shutter.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                                {/* ✅ 検査記録一覧テーブル */}
+                                {!loading && !error && inspectionRecords && inspectionRecords.length > 0 ? (
+                                    <InspectionRecordsTable inspectionRecords={inspectionRecords} />
+                                ) : (
+                                    !loading && !error && (
+                                        <div className="text-center p-6">📂 検査記録データがありません</div>
+                                    )
+                                )}
+                            </>
                         )
                     )}
 
@@ -172,19 +185,6 @@ const InspectionRecordsPage = () => {
                             <p className="text-xs">{error}</p>
                         </div>
                     )}
-
-                    <label className="block font-bold mb-2">
-                        検査記録
-                    </label>
-                    {/* ✅ 検査記録一覧テーブル */}
-                    {!loading && !error && inspectionRecords && inspectionRecords.length > 0 ? (
-                        <InspectionRecordsTable inspectionRecords={inspectionRecords} />
-                    ) : (
-                        !loading && !error && (
-                            <div className="text-center p-6">📂 検査記録データがありません</div>
-                        )
-                    )}
-
                 </div>
             </PageLockGuard>
         </LoginCheck>

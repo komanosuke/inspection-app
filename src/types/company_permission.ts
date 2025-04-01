@@ -1,9 +1,10 @@
 export type CompanyPermission = {
     id?: string;
     granter_company_id: string;
+    granter_company_name?: string;
     receiver_company_id: string;
-    view_inspectors: boolean;
-    view_inspectors_status: string;
+    receiver_company_name: string;
+    approval: boolean;
     created_at?: string;
     updated_at?: string;
 };

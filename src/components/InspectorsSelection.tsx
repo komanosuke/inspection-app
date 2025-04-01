@@ -91,7 +91,7 @@ const InspectorsSelection = ({ selectedCompanies, selectedInspectors, setSelecte
             {/* ✅ 自社の検査者 */}
             {ownInspectors.length > 0 ? (
                 <>
-                    <h3 className="font-semibold mb-2">自社の検査者（必須）</h3>
+                    <h3 className="font-semibold mb-2">自社の検査者<span className="text-red-500">*</span></h3>
                     <div className="border rounded-lg p-4 mb-2">
                         {ownInspectors.map((inspector, index) => (
                             <InspectorCheckbox
@@ -115,7 +115,7 @@ const InspectorsSelection = ({ selectedCompanies, selectedInspectors, setSelecte
             {/* ✅ 協力会社の検査者 */}
             {Object.keys(companyInspectors).map((companyId) => {
                 const company = selectedCompanies.find(c => c.id === companyId);
-                const hasViewInspectorsPermission = company?.view_inspectors; // 検査者閲覧許可があるか
+                const hasViewInspectorsPermission = company?.approval; // 検査者閲覧許可があるか
                 const hasRole = company?.role; // 役割が選択されているか
                 const hasManager = company?.manager; // 現場代理人名が選択されているか
 

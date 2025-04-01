@@ -16,7 +16,10 @@ export default function LoginPage() {
         setLocalError(null);
 
         const { success, error } = await login(email, password);
-        if (!success) {
+        if (success) {
+            // ロック解除成功状態を削除
+            localStorage.removeItem("pageUnlocked");
+        } else {
             setLocalError(error || "ログインに失敗しました");
         }
     };

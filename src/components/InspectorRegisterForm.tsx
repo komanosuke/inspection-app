@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useInspectors } from "@/lib/hooks/useInspectors";
-import { Inspector } from "@/types/inspector";
+import { Inspector, inspectorFields } from "@/types/inspector";
+import InputField from "@/components/InputField";
+import InspectorsTable from "./InspectorsTable";
 
 const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
     const { createInspector, updateInspector, deleteInspector } = useInspectors();
@@ -13,8 +15,41 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
     const [formData, setFormData] = useState<Inspector>({
         company_id: companyId,
         name: "",
-        inspector_number: ""
+        inspector_number: "",
+        furigana: "",
+        architect_name: "",
+        architect_registration_name: "",
+        architect_registration_number: "",
+        fire_protection_inspector_number: "",
+        workplace_name: "",
+        architect_office_name: "",
+        governor_registration_name: "",
+        governor_registration_number: "",
+        post_number: "",
+        address: "",
+        phone_number: "",
     });
+
+    // useEffect(() => {
+    //     setFormData({
+    //         company_id: companyId,
+    //         name: "山田 太郎",
+    //         furigana: "やまだ たろう",
+    //         post_number: "1234567",
+    //         address: "東京都新宿区テスト1-1-1",
+    //         phone_number: "03-1234-5678",
+    //         inspector_number: "INS-001",
+    //         workplace_name: "株式会社テスト建設",
+    //         architect_office_name: "プロ",
+    //         architect_name: "一級",
+    //         architect_registration_name: "東京都知事",
+    //         architect_registration_number: "12345",
+    //         fire_protection_inspector_number: "FP-999",
+    //         governor_registration_name: "東京都",
+    //         governor_registration_number: "67890",
+    //     });
+    // }, []);
+    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
@@ -74,15 +109,94 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
             </div>
 
             <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="name">氏名（必須）</label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="text" id="name" value={formData.name} onChange={handleChange} required />
+                {inspectorFields.map((field) => (
+                    <InputField
+                        key={field.id}
+                        id={field.id}
+                        label={field.label}
+                        value={formData[field.id as keyof Inspector] as string | number}
+                        type={field.type || "text"}
+                        required={field.required}
+                        onChange={handleChange}
+                    />
+                ))}
+
+                <div className="">
+                    {/* 建築士事務所 */}
+                    <label className="block mb-4">
+                        <input
+                            type="text"
+                            name="architect_office_name"
+                            className="w-64 px-4 py-2 border rounded-lg"
+                            value={formData.architect_office_name || ""}
+                            onChange={handleChange}
+                        /> 建築士事務所
+                    </label>
+
+                    {/* 知事登録 第 ○○号 */}
+                    <label className="block mb-4">
+                        <input
+                            type="text"
+                            className="w-64 px-4 py-2 border rounded-lg"
+                            name="governor_registration_name"
+                            value={formData.governor_registration_name || ""}
+                            onChange={handleChange}
+                        /> 知事登録 第 
+                        <input
+                            type="text"
+                            className="ml-2 w-64 px-4 py-2 border rounded-lg"
+                            name="governor_registration_number"
+                            value={formData.governor_registration_number || ""}
+                            onChange={handleChange}
+                        /> 号
+                    </label>
                 </div>
 
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="inspector_number">検査者番号（必須）</label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="text" id="inspector_number" value={formData.inspector_number} onChange={handleChange} required />
+                {/* 建築士 */}
+                <div className="block text-gray-700 font-bold mb-4">
+                    資格
                 </div>
+                <div className="">
+                    <label className="block mb-4">
+                        <input
+                            type="text"
+                            className="w-64 px-4 py-2 border rounded-lg"
+                            name="architect_name"
+                            value={formData.architect_name || ""}
+                            onChange={handleChange}
+                        /> 建築士
+                    </label>
+
+                    {/* 登録 第 ○○号 */}
+                    <label className="block mb-4">
+                        <input
+                            type="text"
+                            className="w-64 px-4 py-2 border rounded-lg"
+                            name="architect_registration_name"
+                            value={formData.architect_registration_name || ""}
+                            onChange={handleChange}
+                        /> 登録 第 
+                        <input
+                            type="text"
+                            className="ml-2 w-64 px-4 py-2 border rounded-lg"
+                            name="architect_registration_number"
+                            value={formData.architect_registration_number || ""}
+                            onChange={handleChange}
+                        /> 号
+                    </label>
+                </div>
+
+                {/* 防火設備検査員 第 ○○号 */}
+                <label className="block mb-2">
+                    防火設備検査員第
+                    <input
+                        type="text"
+                        className="ml-2 w-64 px-4 py-2 border rounded-lg"
+                        name="fire_protection_inspector_number"
+                        value={formData.fire_protection_inspector_number || ""}
+                        onChange={handleChange}
+                    /> 号
+                </label>
 
                 <div className="flex justify-end">
                     <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">登録</button>

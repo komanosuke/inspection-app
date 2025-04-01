@@ -156,7 +156,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
             {/* ✅ 現場とシャッターが選択されている場合のみフォーム表示 */}
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="inspection_date">検査日（必須）</label>
+                    <label className="block font-bold mb-2" htmlFor="inspection_date">検査日<span className="text-red-500">*</span></label>
                     <input className="w-full px-4 py-2 border rounded-lg" type="date" id="inspection_date" value={formData.inspection_date} onChange={handleChange} required />
                 </div>
 
@@ -172,7 +172,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
 
                         <div className="mb-4">
                             <label className="block font-bold mb-2" htmlFor="lead_inspector">
-                                代表検査者（必須）
+                                代表検査者<span className="text-red-500">*</span>
                             </label>
                             <select
                                 className="w-full px-4 py-2 border rounded-lg"

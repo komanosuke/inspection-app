@@ -34,27 +34,28 @@ const SitesPage = () => {
     }, [userCompanyId]);
 
     useEffect(() => {
-        if (myCompanyPermissions) {
-            // 許可された会社のID一覧を抽出
-            const permittedCompanyIds = myCompanyPermissions.map(p => p.granter_company_id);
-            // console.log("myCompanyPermissions: ", myCompanyPermissions);
-            // console.log("permittedCompanyIds: ", permittedCompanyIds);
-            // console.log("companies: ", companies);
-            
-            // 許可された会社の情報を `fetchCompanies` の結果からフィルタリングし、view_inspectors を追加
-            const permittedCompaniesList = (companies || []).filter(c => 
-                permittedCompanyIds.includes(c.id)
-            ).map(company => {
-                // 対応する permission を見つけて view_inspectors を取得
-                const permission = myCompanyPermissions.find(p => p.granter_company_id === company.id);
-                return {
-                    ...company,
-                    view_inspectors: permission ? permission.view_inspectors : false // デフォルト値を false にする
-                };
-            });
+        if (myCompanyPermissions && companies && myCompany) {
+            // ✅ 自社が「許可を出した会社 (granter)」かつ承認済みのものだけを対象にする
+            const permittedCompanyIds = myCompanyPermissions
+                .filter(p => p.granter_company_id === myCompany.id && p.approval)
+                .map(p => p.receiver_company_id);
+    
+            const permittedCompaniesList = companies
+                .filter(c => permittedCompanyIds.includes(c.id))
+                .map(company => {
+                    const permission = myCompanyPermissions.find(
+                        p => p.receiver_company_id === company.id && p.granter_company_id === myCompany.id
+                    );
+                    return {
+                        ...company,
+                        approval: permission?.approval ?? false
+                    };
+                });
+    
             setPermittedCompanies(permittedCompaniesList);
+            console.log("✅ permittedCompaniesList:", permittedCompaniesList);
         }
-    }, [myCompanyPermissions, companies]); // ✅ `myCompanyPermissions` & `companies` の変更を検知    
+    }, [myCompanyPermissions, companies, myCompany]);    
 
     return (
         <LoginCheck>
@@ -65,6 +66,7 @@ const SitesPage = () => {
                     <div className="sm:flex justify-between items-center mb-4">
                         <h1 className="text-xl font-bold mb-2 sm:mb-0">現場一覧</h1>
                         <button
+                            disabled={!myCompany}
                             onClick={() => setIsModalOpen(true)}
                             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                         >

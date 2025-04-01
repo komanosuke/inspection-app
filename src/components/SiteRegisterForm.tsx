@@ -1,22 +1,83 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CompanySelection from "./CompanySelection";
 import { useSites } from "@/lib/hooks/useSites";
 import { useSiteCompanies } from "@/lib/hooks/useSiteCompanies";
+import { Site, siteFields } from "@/types/site";
+import InputField from "@/components/InputField";
 
 const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: () => void; company: any; permittedCompanies: any[]; }) => {
     const { createSite } = useSites();
-    const { createSiteCompany } = useSiteCompanies();
+    const { createSiteCompany, loading } = useSiteCompanies();
     const [selectedCompany, setSelectedCompany] = useState<any>(null);
+    const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
-
-    const [formData, setFormData] = useState({
-        company_id: company.id, // ログイン会社（管理会社）
-        name: "",
-        owner_name: "",
-        address: "",
+    const [formData, setFormData] = useState<Site>({
+        company_id: company.id || "", // ログイン会社（管理会社）
+        name: "", // 現場名
+        furigana: "", // 現場名フリガナ
+        address: "", // 現場住所
+        purpose: "", // 現場の用途
+        owner_name: "", // オーナー名
+        owner_furigana: "", // オーナー名フリガナ
+        owner_post_number: "", // オーナー郵便番号
+        owner_address: "", // オーナー住所
+        owner_phone_number: "", // オーナー電話番号
+        manager_name: "", // 管理者名
+        manager_furigana: "", // 管理者名フリガナ
+        manager_post_number: "", // 管理者郵便番号
+        manager_address: "", // 管理者住所
+        manager_phone_number: "", // 管理者電話番号
+        num_floors_above: 0, // 階数（地上階数）
+        num_floors_below: 0, // 階数（地下階数）
+        building_area: 0.0, // 建築面積（㎡）
+        total_floor_area: 0.0, // 延べ面積（㎡）
+        confirmation_certificate_date: "", // 確認済証交付年月日
+        confirmation_certificate_number: "", // 確認済証番号
+        is_confirmation_by_building_officer: false, // 確認済証交付者_建築主事等
+        is_confirmation_by_agency: false, // 確認済証交付者_指定機関
+        confirmation_agency_name: "", // 確認済証交付者_指定機関名
+        inspection_certificate_date: "", // 検査済証交付年月日
+        inspection_certificate_number: "", // 検査済証番号
+        is_inspection_by_building_officer: false, // 検査済証交付者_建築主事等
+        is_inspection_by_agency: false, // 検査済証交付者_指定機関
+        inspection_agency_name: "", // 検査済証交付者_指定機関名
     });
+
+    // useEffect(() => {
+    //     setFormData({
+    //       company_id: company.id || "",
+    //       name: "テスト現場",
+    //       furigana: "てすとげんば",
+    //       address: "東京都渋谷区テスト町1-1-1",
+    //       purpose: "マンション",
+    //       owner_name: "山田 太郎",
+    //       owner_furigana: "やまだ たろう",
+    //       owner_post_number: "1234567",
+    //       owner_address: "東京都品川区1-2-3",
+    //       owner_phone_number: "090-1234-5678",
+    //       manager_name: "佐藤 花子",
+    //       manager_furigana: "さとう はなこ",
+    //       manager_post_number: "2345678",
+    //       manager_address: "東京都新宿区4-5-6",
+    //       manager_phone_number: "080-8765-4321",
+    //       num_floors_above: 10,
+    //       num_floors_below: 1,
+    //       building_area: 250.5,
+    //       total_floor_area: 1234.5,
+    //       confirmation_certificate_date: "2025-04-01",
+    //       confirmation_certificate_number: "ABC-12345",
+    //       is_confirmation_by_building_officer: true,
+    //       is_confirmation_by_agency: false,
+    //       confirmation_agency_name: "",
+    //       inspection_certificate_date: "2025-05-01",
+    //       inspection_certificate_number: "XYZ-67890",
+    //       is_inspection_by_building_officer: false,
+    //       is_inspection_by_agency: true,
+    //       inspection_agency_name: "テスト検査機関"
+    //     });
+    //   }, []);
 
     const handleSiteDataChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { id, value } = e.target;
@@ -29,11 +90,25 @@ const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: (
     const handleSiteDataSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // console.log("📤 登録データ:", formData);
-        // console.log("selectedCompanies: ", selectedCompanies);
-        // console.log("selectedInspectors: ", selectedInspectors);
-        // データ確認中のため一時的にここで終了
-        // return;
+        if (!selectedCompany || !selectedCompany.id) {
+            alert("協力会社を選択してください。");
+            return;
+        }
+
+        // 🔍 バリデーションチェック
+        const errors: { [key: string]: string } = {};
+        siteFields.forEach((field) => {
+            const value = formData[field.id as keyof Site];
+            if (field.required && field.validation && !field.validation(value)) {
+                errors[field.id] = `${field.label}が正しくありません`;
+            }
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            alert("⛔ 入力に不備があります。赤枠の項目を確認してください。");
+            return;
+        }
 
         try {
             // **Step 1: 現場 (`sites`) を作成**
@@ -81,7 +156,6 @@ const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: (
                 <h2 className="text-lg font-bold mb-2">管理会社</h2>
                 <p className="mb-4">{ company.name }</p>
 
-                <h2 className="text-lg font-bold mb-2">協力会社</h2>
                 {/* 🚨 協力会社がいない場合の警告メッセージ */}
                 {permittedCompanies.length === 0 ? (
                     <p className="border border-red-500 text-red-500 p-4 mb-4 rounded-lg">
@@ -98,44 +172,18 @@ const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: (
 
                 {permittedCompanies.length !== 0 && (
                     <>
-                        {/* 現場名 */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-bold mb-2" htmlFor="name">現場名（必須）</label>
-                            <input 
-                                className="w-full px-4 py-2 border rounded-lg" 
-                                type="text" 
-                                id="name" 
-                                value={formData.name} 
-                                onChange={handleSiteDataChange} 
-                                required
+                        {siteFields.map((field) => (
+                            <InputField
+                                key={field.id}
+                                id={field.id}
+                                label={field.label}
+                                value={formData[field.id as keyof Site] as string | number}
+                                type={field.type || "text"}
+                                required={field.required}
+                                onChange={handleSiteDataChange}
+                                error={formErrors[field.id]}
                             />
-                        </div>
-
-                        {/* オーナー名 */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-bold mb-2" htmlFor="owner_name">オーナー名（必須）</label>
-                            <input 
-                                className="w-full px-4 py-2 border rounded-lg" 
-                                type="text" 
-                                id="owner_name" 
-                                value={formData.owner_name} 
-                                onChange={handleSiteDataChange} 
-                                required
-                            />
-                        </div>
-
-                        {/* 所在地 */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-bold mb-2" htmlFor="address">所在地（必須）</label>
-                            <input 
-                                className="w-full px-4 py-2 border rounded-lg" 
-                                type="text" 
-                                id="address" 
-                                value={formData.address} 
-                                onChange={handleSiteDataChange} 
-                                required
-                            />
-                        </div>
+                        ))}
 
                         {/* 登録ボタン */}
                         <div className="flex justify-end">

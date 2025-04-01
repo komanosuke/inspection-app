@@ -195,15 +195,12 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                     <div className="text-center p-4 text-gray-500">現場を読み込み中...</div>
                 ) : sites && (sites.length === 0 ? (
                         <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
-                            📂 現場が登録されていません。<br />
-                            <a href="/sites" className="text-blue-500 hover:underline">
-                                現場を登録する
-                            </a>
+                            📂 現場が登録されていません。
                         </div>
                     ) : (
                         <div className="mb-4">
                             <label className="block font-bold mb-2" htmlFor="site_id">
-                                現場（必須）
+                                現場<span className="text-red-500">*</span>
                             </label>
                             <select
                                 className="w-full px-4 py-2 border rounded-lg"
@@ -228,16 +225,13 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                     <div className="text-center p-4 text-gray-500">シャッターを読み込み中...</div>
                 ) : siteId && shutters && shutters.length === 0 ? (
                     <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
-                        📂 シャッターが登録されていません。<br />
-                        <a href="/shutters" className="text-blue-500 hover:underline">
-                            シャッターを登録する
-                        </a>
+                        📂 シャッターが登録されていません。
                     </div>
                 ) : (
                     siteId && (
                         <div className="mb-4">
                             <label className="block font-bold mb-2" htmlFor="shutter_id">
-                                シャッター（必須）
+                                シャッター<span className="text-red-500">*</span>
                             </label>
                             <select
                                 className="w-full px-4 py-2 border rounded-lg"
@@ -261,13 +255,13 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 {sites && sites.length > 0 && shutters && shutters.length > 0 && siteId && shutterId && (
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label className="block font-bold mb-2" htmlFor="inspection_date">検査日（必須）</label>
+                            <label className="block font-bold mb-2" htmlFor="inspection_date">検査日<span className="text-red-500">*</span></label>
                             <input className="w-full px-4 py-2 border rounded-lg" type="date" id="inspection_date" value={formData.inspection_date} onChange={handleChange} required />
                         </div>
 
                         {!inspectors || inspectors.length === 0 ? (
                             <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
-                                📂 検査者が登録されていません。<br />
+                                📂 検査者が登録されていません。
                                 <a href="/inspectors" className="text-blue-500 hover:underline">
                                     検査者を登録する
                                 </a>
@@ -277,7 +271,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
 
                                 <div className="mb-4">
                                     <label className="block font-bold mb-2" htmlFor="lead_inspector">
-                                        代表検査者（必須）
+                                        代表検査者<span className="text-red-500">*</span>
                                     </label>
                                     <select
                                         className="w-full px-4 py-2 border rounded-lg"

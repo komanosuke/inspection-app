@@ -12,7 +12,7 @@ const CompanySelection = ({ selectedCompany, setSelectedCompany, permittedCompan
 
     return (
         <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2">協力会社を選択（必須）</label>
+            <label className="block text-gray-700 font-bold mb-2">協力会社を選択<span className="text-red-500">*</span></label>
             <select
                 className="w-full px-4 py-2 border rounded-lg"
                 value={selectedCompany?.id || ""}

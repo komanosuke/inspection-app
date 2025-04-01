@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useShutters } from "@/lib/hooks/useShutters";
 import { Shutter } from "@/types/shutter";
-import LoadingSpinner from "@/components/LoadingSpinner";
 
 const ShutterRegisterForm = ({
     onClose,
@@ -44,16 +43,17 @@ const ShutterRegisterForm = ({
         setError(null);
     
         try {
-            console.log(formData);
             if (!userId) {
                 alert("ユーザーIDが不明です。処理を実行できません。");
             }
 
             const sanitizedFormData = {
                 ...formData,
+                site_id: siteId,
                 company_id: userId,
-                // inspection_date: formData.inspection_date || null,
             };
+
+            console.log(sanitizedFormData);
     
             const createResult = await createShutter(sanitizedFormData);
     
@@ -77,15 +77,13 @@ const ShutterRegisterForm = ({
 
     return (
         <div className="md:p-6">
-            {loading && <LoadingSpinner />}
-
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">シャッター登録</h1>
             </div>
 
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="name">現場（必須）</label>
+                    <label className="block font-bold mb-2" htmlFor="name">現場<span className="text-red-500">*</span></label>
                     { siteName ? (
                         <p className="">{siteName}</p>
                     ) : (
@@ -94,12 +92,12 @@ const ShutterRegisterForm = ({
                 </div>
 
                 <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="name">シャッター名（必須）</label>
+                    <label className="block font-bold mb-2" htmlFor="name">シャッター名<span className="text-red-500">*</span></label>
                     <input className="w-full px-4 py-2 border rounded-lg" type="text" id="name" value={formData.name} onChange={handleChange} required />
                 </div>
 
                 <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="model_number">モデル番号（必須）</label>
+                    <label className="block font-bold mb-2" htmlFor="model_number">モデル番号<span className="text-red-500">*</span></label>
                     <input className="w-full px-4 py-2 border rounded-lg" type="text" id="model_number" value={formData.model_number} onChange={handleChange} required />
                 </div>
 

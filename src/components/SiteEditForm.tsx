@@ -4,28 +4,64 @@ import React, { useState, useEffect } from "react";
 import CompanySelection from "./CompanySelection";
 import { useSites } from "@/lib/hooks/useSites";
 import { useSiteCompanies } from "@/lib/hooks/useSiteCompanies";
-import { Site } from "@/types/site";
+import { Site, siteFields } from "@/types/site";
+import InputField from "@/components/InputField";
 
 const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose: () => void; site: Site; company: any; permittedCompanies: any[]; }) => {
     const { updateSite } = useSites();
     const { fetchSiteCompanies, siteCompanies, createSiteCompany, deleteSiteCompany } = useSiteCompanies();
     const [selectedCompany, setSelectedCompany] = useState<any>(null);
-    const [formData, setFormData] = useState({
+    const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
+    // 📚 自動的に Site 型の初期値を生成
+    const initialFormData: Site = {
+        id: "",
         company_id: "", // ログイン会社（管理会社）
-        name: "",
-        owner_name: "",
-        address: "",
-    });
+        name: "", // 現場名
+        furigana: "", // 現場名フリガナ
+        address: "", // 現場住所
+        purpose: "", // 現場の用途
+        owner_name: "", // オーナー名
+        owner_furigana: "", // オーナー名フリガナ
+        owner_post_number: "", // オーナー郵便番号
+        owner_address: "", // オーナー住所
+        owner_phone_number: "", // オーナー電話番号
+        manager_name: "", // 管理者名
+        manager_furigana: "", // 管理者名フリガナ
+        manager_post_number: "", // 管理者郵便番号
+        manager_address: "", // 管理者住所
+        manager_phone_number: "", // 管理者電話番号
+        num_floors_above: 0, // 階数（地上階数）
+        num_floors_below: 0, // 階数（地下階数）
+        building_area: 0.0, // 建築面積（㎡）
+        total_floor_area: 0.0, // 延べ面積（㎡）
+        confirmation_certificate_date: "", // 確認済証交付年月日
+        confirmation_certificate_number: "", // 確認済証番号
+        is_confirmation_by_building_officer: false, // 確認済証交付者_建築主事等
+        is_confirmation_by_agency: false, // 確認済証交付者_指定機関
+        confirmation_agency_name: "", // 確認済証交付者_指定機関名
+        inspection_certificate_date: "", // 検査済証交付年月日
+        inspection_certificate_number: "", // 検査済証番号
+        is_inspection_by_building_officer: false, // 検査済証交付者_建築主事等
+        is_inspection_by_agency: false, // 検査済証交付者_指定機関
+        inspection_agency_name: "", // 検査済証交付者_指定機関名
+    };
+
+    const [formData, setFormData] = useState(initialFormData);
+
+    // 📚 `site` から `formData` をマッピング
+    const mapSiteToFormData = (site: Site, company: any) => {
+        return {
+            ...initialFormData, // デフォルト値で初期化
+            ...site, // `site` の値を上書き
+            company_id: site.company_id || company?.id || "", // `company_id` だけ特別扱い
+        };
+    };
 
     // ✅ 初期データ設定
     useEffect(() => {
         if (site) {
-            setFormData({
-                company_id: site.company_id || company.id,
-                name: site.name || "",
-                owner_name: site.owner_name || "",
-                address: site.address || "",
-            });
+            setFormData(mapSiteToFormData(site, company));
             fetchSiteCompanies(site.id); // 会社情報をフェッチ
         }
     }, [site, company]);
@@ -59,11 +95,27 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
 
     const handleSiteDataSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // console.log("📤 登録データ:", formData);
-        // console.log("selectedCompanies: ", selectedCompanies);
-        // console.log("selectedInspectors: ", selectedInspectors);
-        // データ確認中のため一時的にここで終了
-        // return;
+
+        if (!selectedCompany || !selectedCompany.id) {
+            alert("協力会社を選択してください。");
+            return;
+        }
+
+        // 🔍 バリデーションチェック
+        const errors: { [key: string]: string } = {};
+        siteFields.forEach((field) => {
+            const value = formData[field.id as keyof Site];
+            if (field.required && field.validation && !field.validation(value)) {
+                errors[field.id] = `${field.label}が正しくありません`;
+            }
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            alert("⛔ 入力に不備があります。赤枠の項目を確認してください。");
+            return;
+        }
+
 
         try {
             // **Step 1: 現場 (`sites`) を更新**
@@ -120,7 +172,6 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
                 <h2 className="text-lg font-bold mb-2">管理会社</h2>
                 <p className="mb-4">{ company.name }</p>
 
-                <h2 className="text-lg font-bold mb-2">協力会社</h2>
                 {/* 🚨 協力会社がいない場合の警告メッセージ */}
                 {permittedCompanies.length === 0 ? (
                     <p className="border border-red-500 text-red-500 p-4 mb-4 rounded-lg">
@@ -137,44 +188,18 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
 
                 {permittedCompanies.length !== 0 && (
                     <>
-                        {/* 現場名 */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-bold mb-2" htmlFor="name">現場名（必須）</label>
-                            <input 
-                                className="w-full px-4 py-2 border rounded-lg" 
-                                type="text" 
-                                id="name" 
-                                value={formData.name} 
-                                onChange={handleSiteDataChange} 
-                                required
+                        {siteFields.map((field) => (
+                            <InputField
+                                key={field.id}
+                                id={field.id}
+                                label={field.label}
+                                value={formData[field.id as keyof Site] as string | number}
+                                type={field.type || "text"}
+                                required={field.required}
+                                onChange={handleSiteDataChange}
+                                error={formErrors[field.id]}
                             />
-                        </div>
-
-                        {/* オーナー名 */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-bold mb-2" htmlFor="owner_name">オーナー名（必須）</label>
-                            <input 
-                                className="w-full px-4 py-2 border rounded-lg" 
-                                type="text" 
-                                id="owner_name" 
-                                value={formData.owner_name} 
-                                onChange={handleSiteDataChange} 
-                                required
-                            />
-                        </div>
-
-                        {/* 所在地 */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-bold mb-2" htmlFor="address">所在地（必須）</label>
-                            <input 
-                                className="w-full px-4 py-2 border rounded-lg" 
-                                type="text" 
-                                id="address" 
-                                value={formData.address} 
-                                onChange={handleSiteDataChange} 
-                                required
-                            />
-                        </div>
+                        ))}
 
                         {/* 更新ボタン */}
                         <div className="flex justify-end">

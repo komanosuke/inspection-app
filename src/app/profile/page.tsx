@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import LoginCheck from "@/components/LoginCheck";
 import PageLockGuard from "@/components/PageLockGuard";
-import CompanyForPermissionSelection from "@/components/CompanyForPermissionSelection";
 import { useCompanies } from "@/lib/hooks/useCompanies";
 import { useCompanyPermissions } from "@/lib/hooks/useCompanyPermissions";
 import { Company } from "@/types/company";
@@ -24,15 +23,22 @@ export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [errors, setErrors] = useState<Record<string, string>>({}); // ✅ エラーメッセージ管理
 
-    const [selectedCompanies, setSelectedCompanies] = useState<Company[]>([]);
     const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
     // ✅ パスワードの表示/非表示トグル状態
     const [showPassword, setShowPassword] = useState(false);
     // ✅ パスワード変更フラグ
     const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
+    const [granterCompanyId, setGranterCompanyId] = useState("");
 
+    type CompanyInfo = {
+        id: string;
+        name?: string;
+    };
+    // ✅ オブジェクトの配列として初期化
+    const [approvedCompanies, setApprovedCompanies] = useState<CompanyInfo[]>([]);
+    const [pendingCompanies, setPendingCompanies] = useState<CompanyInfo[]>([]);
 
-    const { fetchCompanies, fetchMyCompany, createCompany, updateCompany, myCompany, companies } = useCompanies();
+    const { fetchMyCompany, createCompany, updateCompany, myCompany, loading } = useCompanies();
     const { fetchMyCompanyPermissions, createCompanyPermission, updateCompanyPermission, deleteCompanyPermission, myCompanyPermissions } = useCompanyPermissions();
 
     useEffect(() => {
@@ -48,7 +54,6 @@ export default function ProfilePage() {
         setForm((prev) => ({ ...prev, id: user_id }));
 
         fetchMyCompany(user_id);
-        fetchCompanies(user_id);
 
         fetchMyCompanyPermissions(user_id);
         setIsLoading(false);
@@ -65,18 +70,48 @@ export default function ProfilePage() {
     }, [myCompany]);
 
     useEffect(() => {
-        if (myCompanyPermissions) {
-            // 許可された会社のID一覧を抽出
-            const permittedCompanyIds = myCompanyPermissions.map(p => p.receiver_company_id);
-            
-            // 許可された会社の情報を `fetchCompanies` の結果からフィルタリング
-            const permittedCompaniesList = (companies || []).filter(c => 
-                permittedCompanyIds.includes(c.id)
-            );
+        if (myCompanyPermissions && myCompany) {
+
+            let approved = [] as CompanyInfo[];
+            let pending = [] as CompanyInfo[];
     
-            setSelectedCompanies(permittedCompaniesList);
+            if (myCompany.type === "管理会社") {
+                // ✅ 管理会社の場合: granter_company_id でフィルタ
+                approved = myCompanyPermissions
+                    .filter((p) => p.approval && p.granter_company_id === myCompany.id)
+                    .map((p) => ({
+                        id: p.receiver_company_id,
+                        name: p.receiver_company_name,
+                    }));
+    
+                pending = myCompanyPermissions
+                    .filter((p) => !p.approval && p.granter_company_id === myCompany.id)
+                    .map((p) => ({
+                        id: p.receiver_company_id,
+                        name: p.receiver_company_name,
+                    }));
+            } else if (myCompany.type === "協力会社") {
+                // ✅ 協力会社の場合: receiver_company_id でフィルタ
+                approved = myCompanyPermissions
+                    .filter((p) => p.approval && p.receiver_company_id === myCompany.id)
+                    .map((p) => ({
+                        id: p.granter_company_id,
+                        name: p.granter_company_name,
+                    }));
+    
+                pending = myCompanyPermissions
+                    .filter((p) => !p.approval && p.receiver_company_id === myCompany.id)
+                    .map((p) => ({
+                        id: p.granter_company_id,
+                        name: p.granter_company_name,
+                    }));
+            }
+    
+            setApprovedCompanies(approved);
+            setPendingCompanies(pending);
         }
-    }, [myCompanyPermissions, companies]);
+    }, [myCompanyPermissions, myCompany]);    
+    
 
     // ✅ **バリデーション関数**
     const validateForm = () => {
@@ -86,8 +121,8 @@ export default function ProfilePage() {
         if (!form.representative_name.trim()) newErrors.representative_name = "代表者名を入力してください。";
         if (!form.type?.trim()) newErrors.type = "契約形態を選択してください。";
         // ✅ 協力会社の場合、選択された会社があるか確認
-        if (form.type === "協力会社" && selectedCompanies.length === 0) {
-            newErrors.selectedCompanies = "協力会社の場合、少なくとも1つの会社を選択してください。";
+        if (form.type === "協力会社" && !granterCompanyId && !isRegistered) {
+            newErrors.granterCompanyId = "管理会社IDを入力してください。";
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0; // ✅ エラーがなければ true を返す
@@ -122,73 +157,73 @@ export default function ProfilePage() {
 
             // 会社登録後にパーミッションを処理
             if (form.type === "協力会社") {
-                handlePermissionsUpdate(form.id);
+                handlePermissionsUpdate(form.id, granterCompanyId, form.name);
             }
 
             alert("登録/更新が成功しました！");
-            window.location.reload() // サイドバー更新のためページリロード
+            window.location.reload(); // サイドバー更新のためページリロード
         } catch (error) {
             console.error("❌ データ送信エラー:", error);
             alert("データの送信に失敗しました。");
         }
     };
 
-    const handlePermissionsUpdate = async (companyId: string) => {
-        console.log("🔄 パーミッションの更新を開始...");
-    
-        const existingPermissions = myCompanyPermissions || [];
-        const selectedCompanyIds = selectedCompanies.map((c) => c.id);
-    
-        // 追加すべきパーミッション
-        const permissionsToAdd = selectedCompanies.filter(
-            (c) => !existingPermissions.some((p) => p.receiver_company_id === c.id)
-        );
-    
-        // 更新すべきパーミッション
-        const permissionsToUpdate = existingPermissions.filter(
-            (p) => selectedCompanyIds.includes(p.receiver_company_id)
-        );
-    
-        // 削除すべきパーミッション
-        const permissionsToDelete = existingPermissions.filter(
-            (p) => !selectedCompanyIds.includes(p.receiver_company_id)
-        );
-    
-        console.log("✅ 追加:", permissionsToAdd);
-        console.log("✅ 更新:", permissionsToUpdate);
-        console.log("✅ 削除:", permissionsToDelete);
+    const handlePermissionsUpdate = async (companyId: string, granterCompanyId: string, companyName: string) => {
+        console.log("🔄 協力会社の申請を作成中...");
+        if (isRegistered && !granterCompanyId) {
+            return;
+        }
     
         try {
-            // **パーミッションを追加**
-            await Promise.all(
-                permissionsToAdd.map((company) =>
-                    createCompanyPermission({
-                        granter_company_id: companyId,
-                        receiver_company_id: company.id,
-                        view_inspectors: true,
-                        view_inspectors_status: "許可",
-                    })
-                )
-            );
+            // ✅ 新規パーミッション作成（approval: false）
+            const { success, error } = await createCompanyPermission({
+                granter_company_id: granterCompanyId,
+                receiver_company_id: companyId,
+                receiver_company_name: companyName,
+                approval: false, // 申請中状態
+            });
     
-            // **既存のパーミッションを更新**
-            await Promise.all(
-                permissionsToUpdate.map((permission) =>
-                    updateCompanyPermission(permission.id!, {
-                        view_inspectors: true,
-                        view_inspectors_status: "許可",
-                    })
-                )
-            );
+            if (!success) {
+                throw new Error(error || "申請の作成に失敗しました");
+            }
     
-            // **不要なパーミッションを削除**
-            await Promise.all(
-                permissionsToDelete.map((permission) => deleteCompanyPermission(permission.id!))
-            );
-    
-            console.log("✅ パーミッション更新完了");
+            console.log("✅ 申請が正常に作成されました！");
         } catch (error) {
-            console.error("❌ パーミッション更新エラー:", error);
+            console.error("❌ パーミッション作成エラー:", error);
+            alert("管理会社への申請に失敗しました。");
+        }
+    };
+
+    const approveRequest = async (companyId: string) => {
+        console.log(`✅ ${companyId} の承認を処理中...`);
+        try {
+            if (myCompanyPermissions && myCompany) {
+                // 申請中のパーミッション情報を取得
+                const permissionToApprove = myCompanyPermissions.find(
+                    (p) => p.receiver_company_id === companyId && !p.approval
+                );
+
+                if (!permissionToApprove || !permissionToApprove.id) {
+                    alert("承認リクエストが見つかりません。");
+                    return;
+                }
+        
+                // ✅ 承認 API コール
+                const { success, error } = await updateCompanyPermission(permissionToApprove.id, {
+                    approval: true,
+                    granter_company_name: myCompany.name
+                });
+        
+                if (!success) {
+                    throw new Error(error || "承認に失敗しました。");
+                }
+        
+                alert("✅ 申請を承認しました！");
+                window.location.reload(); // サイドバー更新のためページリロード
+            }
+        } catch (error) {
+            console.error("❌ 承認エラー:", error);
+            alert("承認処理に失敗しました。");
         }
     };    
 
@@ -206,12 +241,87 @@ export default function ProfilePage() {
         }
     };
 
+    // ✅ **選択済みの会社を解除**
+    const removeApprovedCompany = async (companyId: string, byGranter: boolean) => {
+        if (!confirm("本当にこの会社との関連を解除しますか？")) {
+            return;
+        }
+    
+        try {
+            // ✅ 承認済みのパーミッション情報を取得
+            let permissionToDelete;
+            if (byGranter) {
+                permissionToDelete = myCompanyPermissions?.find(
+                    (p) => p.receiver_company_id === companyId && p.approval
+                );
+            } else {
+                permissionToDelete = myCompanyPermissions?.find(
+                    (p) => p.granter_company_id === companyId && p.approval
+                );
+            }
+    
+            if (!permissionToDelete || !permissionToDelete.id) {
+                alert("パーミッションが見つかりませんでした。");
+                return;
+            }
+    
+            // ✅ パーミッション削除
+            const { success, error } = await deleteCompanyPermission(permissionToDelete.id);
+            if (!success) {
+                throw new Error(error || "パーミッションの削除に失敗しました。");
+            }
+    
+            alert(`${byGranter ? "承認を解除しました！" : "関連を解除しました！"}`);
+            window.location.reload();
+        } catch (error) {
+            console.error("❌ 承認解除エラー:", error);
+            alert("承認解除に失敗しました。");
+        }
+    };
 
     return (
         <LoginCheck>
             <PageLockGuard
                 company={myCompany}
             >
+                {loading ? (
+                    <></>
+                ) : (
+                    myCompany?.type === "管理会社" ? (
+                        <div className="pt-4 sm:pt-0 pb-8">
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <Link
+                                    href="/sites"
+                                    className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
+                                >
+                                    📍 現場管理
+                                </Link>
+                                <Link
+                                    href="/shutters"
+                                    className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
+                                >
+                                    🏗️ シャッター管理
+                                </Link>
+                                <Link
+                                    href="/inspection_records"
+                                    className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
+                                >
+                                    📋 検査記録管理
+                                </Link>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="pb-8 text-right">
+                            <Link
+                                href="/inspectors"
+                                className="w-48 mb-2 inline-block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                            >
+                                👷 検査者管理
+                            </Link>
+                        </div>
+                    )
+                )}
+                
                 <div className="bg-white p-4 md:p-8 shadow rounded-lg">
                     <h1 className="text-xl font-bold mb-4">会社プロフィール設定</h1>
 
@@ -220,7 +330,7 @@ export default function ProfilePage() {
                     ) : (
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
-                                <label className="block font-bold mb-2">会社名（必須）</label>
+                                <label className="block font-bold mb-2">会社名<span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     name="name"
@@ -233,7 +343,7 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="mb-4">
-                                <label className="block font-bold mb-2">代表者名（必須）</label>
+                                <label className="block font-bold mb-2">代表者名<span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     name="representative_name"
@@ -246,7 +356,7 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="mb-4">
-                                <label className="block font-bold mb-2">利用モード（必須）</label>
+                                <label className="block font-bold mb-2">利用モード<span className="text-red-500">*</span></label>
                                 <select
                                     name="type"
                                     value={form.type}
@@ -262,19 +372,62 @@ export default function ProfilePage() {
                             </div>
 
                             {form.type === "協力会社" && (
-                                <CompanyForPermissionSelection
-                                    selectedCompanies={selectedCompanies}
-                                    setSelectedCompanies={setSelectedCompanies}
-                                />
+                                <div className="mb-4">
+                                    <label className="block font-bold mb-2">
+                                        管理会社の設定<span className="text-red-500">*</span>
+                                    </label>
+                                    {pendingCompanies.length > 0 ? (
+                                        // ✅ 申請中の場合の正しい構文
+                                        pendingCompanies.map((company) => (
+                                            <p key={company.id} className="text-green-500">
+                                                会社ID {company.id} の会社に申請中
+                                            </p>
+                                        ))
+                                    ) : (
+                                        <>
+                                            {approvedCompanies.length === 0 ? (
+                                                <div className="flex space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        value={granterCompanyId}
+                                                        onChange={(e) => setGranterCompanyId(e.target.value)}
+                                                        className="w-full p-2 border rounded"
+                                                        placeholder="管理会社の会社IDを入力"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <ul className="mt-2">
+                                                    {approvedCompanies.map((company) => (
+                                                        <li
+                                                            key={company.id}
+                                                            className="flex justify-between items-center border p-2 rounded bg-gray-200"
+                                                        >
+                                                            {company.name}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeApprovedCompany(company.id, false)}
+                                                                className="bg-red-500 text-white px-2 py-1 rounded"
+                                                            >
+                                                                解除
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                             )}
-                            {errors.selectedCompanies && <p className="text-red-500 text-sm mb-4">{errors.selectedCompanies}</p>}
+
+                            {errors.granterCompanyId && <p className="text-red-500 text-sm mb-4">{errors.granterCompanyId}</p>}
 
                             <div className="mb-4 relative">
                                 <div className="flex items-center justify-between">
                                     <label className="block font-bold mb-2">
                                         {isRegistered
                                             ? "設定・管理ページのページロックパスワード（任意変更）"
-                                            : "設定・管理ページのページロックパスワード（必須）"}
+                                            : <p>設定・管理ページのページロックパスワード<span className="text-red-500">*</span></p>
+                                        }
                                     </label>
                                     {isRegistered && (
                                         <button
@@ -341,46 +494,57 @@ export default function ProfilePage() {
                             </div>
                         ) : (
                             <>
-                                <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
-                                    {isRegistered && myCompany && myCompany.type === "管理会社" && (
-                                        <div className="">
-                                            <div className="text-xl font-bold mb-4">あなたの会社のID <span className="text-sm text-red-400">※ 協力会社に教えてください。</span></div>
-                                            <p>{myCompany.id}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            
-                                <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
-                                    <div className="text-xl font-bold mb-4">管理ページへのリンク</div>
-                                    <div className="sm:flex flex-wrap justify-between gap-4">
-                                        {myCompany.type === "管理会社" && (
-                                            <Link
-                                                href="/sites"
-                                                className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                                            >
-                                                📍 現場管理
-                                            </Link>
+                                
+                                {myCompany?.type === "管理会社" && (
+                                    <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
+                                        {isRegistered && (
+                                            <>
+                                                <div className="text-xl font-bold mb-4">あなたの会社のID <span className="text-sm text-red-500">※ 協力会社に教えてください。</span></div>
+                                                <p>{myCompany.id}</p>
+                                            </>
                                         )}
-                                        <Link
-                                            href="/inspectors"
-                                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                                        >
-                                            👷 検査者管理
-                                        </Link>
-                                        <Link
-                                            href="/shutters"
-                                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                                        >
-                                            🏗️ シャッター管理
-                                        </Link>
-                                        <Link
-                                            href="/inspection_records"
-                                            className="flex-1 mb-2 sm:mb-0 block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                                        >
-                                            📋 検査記録管理
-                                        </Link>
+                                        {pendingCompanies.length > 0 && (
+                                            <ul className="mt-2">
+                                                {pendingCompanies.map((company) => (
+                                                    <li
+                                                        key={company.id}
+                                                        className="flex justify-between items-center border p-2 rounded bg-gray-200"
+                                                    >
+                                                        {company.name}
+                                                        <button
+                                                            onClick={() => approveRequest(company.id)}
+                                                            className="bg-green-500 text-white px-2 py-1 rounded"
+                                                        >
+                                                            承認
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                        {approvedCompanies.length > 0 && (
+                                            <>
+                                                <div className="text-xl font-bold mt-4 mb-4">承認済みの協力会社</div>
+                                                <ul className="mt-2">
+                                                    {approvedCompanies.map((company) => (
+                                                        <li
+                                                            key={company.id}
+                                                            className="flex justify-between items-center border p-2 rounded bg-gray-200"
+                                                        >
+                                                            {company.name}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeApprovedCompany(company.id, true)}
+                                                                className="bg-red-500 text-white px-2 py-1 rounded"
+                                                            >
+                                                                解除
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </>
+                                        )}
                                     </div>
-                                </div>
+                                )}
                             </>
                         )}
                     </>
