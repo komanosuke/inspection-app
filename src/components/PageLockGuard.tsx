@@ -43,6 +43,7 @@ export default function PageLockGuard({ company, children }: PageLockGuardProps)
         if (isValid) {
             setIsUnlocked(true);
             localStorage.setItem("pageUnlocked", "true"); // ✅ 正しい場合のみローカルストレージに保存
+            window.location.reload();
         } else {
             setError("パスワードが間違っています");
         }

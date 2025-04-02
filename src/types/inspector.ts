@@ -35,3 +35,17 @@ export const inspectorFields = [
     // 勤務先名（必須）
     { id: "workplace_name", label: "勤務先名", required: true, validation: (value: string) => value.trim() !== "" },
 ];
+
+// 補完するフィールド
+const additionalInspectorFields = [
+    { id: "architect_name", label: "資格（建築士）" },
+    { id: "architect_registration_name", label: "建築士登録名" },
+    { id: "architect_registration_number", label: "建築士登録番号" },
+    { id: "fire_protection_inspector_number", label: "防火設備検査員登録番号" },
+    { id: "architect_office_name", label: "建築士事務所名" },
+    { id: "governor_registration_name", label: "知事登録名" },
+    { id: "governor_registration_number", label: "知事登録番号" },
+];
+
+// 全フィールド（既存 + 追加）を結合
+export const inspectorAllFields = [...inspectorFields, ...additionalInspectorFields];

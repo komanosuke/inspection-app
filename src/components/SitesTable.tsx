@@ -159,7 +159,7 @@ const SitesTable = ({ sites, company, permittedCompanies }) => {
                     <table className="w-full border-collapse border border-gray-300 text-center">
                         <thead className="text-gray-700">
                             <tr className="bg-gray-200">
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">オーナー名</th>
+                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">所有者名</th>
                                 <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">住所</th>
                             </tr>
                         </thead>

@@ -121,7 +121,7 @@ export function useCompanies() {
 
     const createCompany = async (company: Company) => {
         try {
-            const { data, error } = await supabase.from("companies").insert([company]).select("*");;
+            const { data, error } = await supabase.from("companies").insert([company]).select("*");
             if (error) throw error;
             setCompanies((prev) => (prev ? [...prev, data[0]] : [data[0]]));
             return { success: true, data };

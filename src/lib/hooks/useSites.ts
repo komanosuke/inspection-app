@@ -32,7 +32,7 @@ export function useSites() {
 
     const createSite = async (site: Site) => {
         try {
-            const { data, error } = await supabase.from("sites").insert([site]).select("*");;
+            const { data, error } = await supabase.from("sites").insert([site]).select("*");
     
             // UNIQUE制約違反のエラーハンドリング
             if (error) {
@@ -53,7 +53,7 @@ export function useSites() {
 
     const updateSite = async (siteId: string, updatedData: Partial<Site>) => {
         try {
-            const { data, error } = await supabase.from("sites").update(updatedData).eq("id", siteId);
+            const { data, error } = await supabase.from("sites").update(updatedData).eq("id", siteId).select("*");
             if (error) throw error;
             setSites((prev) => prev ? prev.map((s) => (s.id === siteId ? { ...s, ...updatedData } : s)) : null);
             return { success: true, data };

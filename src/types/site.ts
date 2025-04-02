@@ -5,11 +5,11 @@ export type Site = {
     furigana?: string; // 現場名フリガナ
     address: string; // 現場住所
     purpose?: string; // 現場の用途
-    owner_name: string; // オーナー名
-    owner_furigana?: string; // オーナー名フリガナ
-    owner_post_number?: string; // オーナー郵便番号
-    owner_address: string; // オーナー住所
-    owner_phone_number?: string; // オーナー電話番号
+    owner_name: string; // 所有者名
+    owner_furigana?: string; // 所有者名フリガナ
+    owner_post_number?: string; // 所有者郵便番号
+    owner_address: string; // 所有者住所
+    owner_phone_number?: string; // 所有者電話番号
     manager_name?: string; // 管理者名
     manager_furigana?: string; // 管理者名フリガナ
     manager_post_number?: string; // 管理者郵便番号
@@ -68,16 +68,16 @@ export const siteFields = [
     { id: "address", label: "所在地", required: true, validation: (value: string) => value.trim() !== "" },
     // 現場の用途（必須）
     { id: "purpose", label: "現場の用途", required: true, validation: (value: string) => value.trim() !== "" },
-    // オーナー名（必須）
-    { id: "owner_name", label: "オーナー名", required: true, validation: (value: string) => value.trim() !== "" },
-    // オーナー名フリガナ（必須）
-    { id: "owner_furigana", label: "オーナー名フリガナ", required: true, validation: (value: string) => value.trim() !== "" },
-    // オーナー郵便番号（7桁の数字である必要あり）
-    { id: "owner_post_number", label: "オーナー郵便番号", required: true, validation: (value: string) => /^[0-9]{7}$/.test(value) },
-    // オーナー住所（必須）
-    { id: "owner_address", label: "オーナー住所", required: true, validation: (value: string) => value.trim() !== "" },
-    // オーナー電話番号（半角数字・ハイフンのみ許可）
-    { id: "owner_phone_number", label: "オーナー電話番号", required: true, validation: (value: string) => /^[0-9-]+$/.test(value) },
+    // 所有者名（必須）
+    { id: "owner_name", label: "所有者名", required: true, validation: (value: string) => value.trim() !== "" },
+    // 所有者名フリガナ（必須）
+    { id: "owner_furigana", label: "所有者名フリガナ", required: true, validation: (value: string) => value.trim() !== "" },
+    // 所有者郵便番号（7桁の数字である必要あり）
+    { id: "owner_post_number", label: "所有者郵便番号", required: true, validation: (value: string) => /^[0-9]{7}$/.test(value) },
+    // 所有者住所（必須）
+    { id: "owner_address", label: "所有者住所", required: true, validation: (value: string) => value.trim() !== "" },
+    // 所有者電話番号（半角数字・ハイフンのみ許可）
+    { id: "owner_phone_number", label: "所有者電話番号", required: true, validation: (value: string) => /^[0-9-]+$/.test(value) },
     // 管理者名（必須）
     { id: "manager_name", label: "管理者名", required: true, validation: (value: string) => value.trim() !== "" },
     // 管理者名フリガナ（必須）

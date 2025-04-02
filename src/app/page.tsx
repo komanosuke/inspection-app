@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import LoginCheck from '@/components/LoginCheck';
 import InspectionRecordRegisterForm from "@/components/InspectionRecordRegisterForm";
 
-const NewInspectionRecordPage = () => {
+const HomePage = () => {
     const router = useRouter();
 
     // ✅ 新規登録完了時
@@ -23,4 +23,4 @@ const NewInspectionRecordPage = () => {
     );
 };
 
-export default NewInspectionRecordPage;
+export default HomePage;

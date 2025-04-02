@@ -297,15 +297,15 @@ export default function ProfilePage() {
                     <></>
                 ) : (
                     myCompany?.type === "管理会社" ? (
-                        <div className="pt-4 sm:pt-0 pb-8">
-                            <div className="flex flex-wrap justify-center gap-4">
+                        <div className="pt-4 sm:pt-0 pb-4 sm:pb-8">
+                            <div className="mx-auto flex flex-wrap justify-center gap-4">
                                 <button
                                     type="button"
                                     onClick={() => {
                                         setIsNavigating(true);
                                         router.push("/sites");
                                     }}
-                                    className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
+                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
                                 >
                                     📍 現場管理
                                 </button>
@@ -315,9 +315,24 @@ export default function ProfilePage() {
                                         setIsNavigating(true);
                                         router.push("/shutters");
                                     }}
-                                    className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
+                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
                                 >
                                     🏗️ シャッター管理
+                                </button>
+                            </div>
+                        </div>
+                    ) : myCompany?.type === "協力会社" && (
+                        <div className="pt-4 sm:pt-0 pb-4 sm:pb-8">
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsNavigating(true);
+                                        router.push("/inspectors");
+                                    }}
+                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
+                                >
+                                    👷 検査者管理
                                 </button>
                                 <button
                                     type="button"
@@ -325,24 +340,11 @@ export default function ProfilePage() {
                                         setIsNavigating(true);
                                         router.push("/inspection_records");
                                     }}
-                                    className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
+                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
                                 >
                                     📋 検査記録管理
                                 </button>
                             </div>
-                        </div>
-                    ) : myCompany?.type === "協力会社" && (
-                        <div className="pb-8 text-right">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsNavigating(true);
-                                    router.push("/inspection_records");
-                                }}
-                                className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
-                            >
-                                👷 検査者管理
-                            </button>
                         </div>
                     )
                 )}

@@ -5,8 +5,8 @@ import { useInspectors } from "@/lib/hooks/useInspectors";
 import { Inspector, inspectorFields } from "@/types/inspector";
 import InputField from "@/components/InputField";
 
-const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
-    const { createInspector, updateInspector, deleteInspector } = useInspectors();
+const InspectorEditForm = ({ onClose, editTarget }: { onClose: () => void; editTarget: Inspector; }) => {
+    const { updateInspector } = useInspectors();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const companyId = localStorage.getItem("user_id") || "";
@@ -30,23 +30,7 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
     });
 
     useEffect(() => {
-        setFormData({
-            company_id: companyId,
-            name: "山田 太郎",
-            furigana: "やまだ たろう",
-            post_number: "1234567",
-            address: "東京都新宿区テスト1-1-1",
-            phone_number: "03-1234-5678",
-            inspector_number: "INS-001",
-            workplace_name: "株式会社テスト建設",
-            architect_office_name: "プロ",
-            architect_name: "一級",
-            architect_registration_name: "東京都知事",
-            architect_registration_number: "12345",
-            fire_protection_inspector_number: "FP-999",
-            governor_registration_name: "東京都",
-            governor_registration_number: "67890",
-        });
+        setFormData(editTarget);
     }, []);
     
 
@@ -67,6 +51,11 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        if (!editTarget.id) {
+            alert("編集対象が不明です。処理を実行できません。");
+            return;
+        }
     
         try {
             console.log(formData);
@@ -81,13 +70,13 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 // receiving_education_date: formData.receiving_education_date || null,
             };
     
-            const createResult = await createInspector(sanitizedFormData);
+            const createResult = await updateInspector(editTarget.id, sanitizedFormData);
     
             if (!createResult.success) {
-                throw new Error(`Supabase 登録に失敗: ${createResult.error}`);
+                throw new Error(`Supabase 更新に失敗: ${createResult.error}`);
             }
     
-            alert("新規の検査者を登録しました。");
+            alert("新規の検査者を更新しました。");
             
             // ✅ 成功したらモーダルを閉じる
             onClose();
@@ -205,4 +194,4 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
     );
 };
 
-export default InspectorRegisterForm;
+export default InspectorEditForm;

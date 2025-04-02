@@ -285,11 +285,6 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                         {!inspectors || inspectors.length === 0 ? (
                             <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
                                 📂 検査者が登録されていません。
-                                {myCompany?.type === "協力会社" && 
-                                    <a href="/inspectors" className="text-blue-500 hover:underline">
-                                        検査者を登録する
-                                    </a>
-                                }
                             </div>
                         ) : (
                             <>

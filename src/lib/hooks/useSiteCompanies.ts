@@ -32,7 +32,7 @@ export function useSiteCompanies() {
 
     const createSiteCompany = async (siteCompany: SiteCompany) => {
         try {
-            const { data, error } = await supabase.from("site_companies").insert([siteCompany]).select("*");;
+            const { data, error } = await supabase.from("site_companies").insert([siteCompany]).select("*");
 
             // UNIQUE制約違反のエラーハンドリング
             if (error) {

@@ -16,6 +16,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, myCompanyType }) =
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const pathname = usePathname();
+    const [isUnlocked, setIsUnlocked] = useState(false);
+
+    useEffect(() => {
+    if (typeof window !== "undefined") {
+        const unlocked = localStorage.getItem("pageUnlocked") !== null;
+        setIsUnlocked(unlocked);
+    }
+    }, []);
 
     useEffect(() => {
         const fetchSession = async () => {
@@ -98,19 +106,34 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, myCompanyType }) =
                 } w-64 p-6 bg-gray-800 text-white min-h-screen transition-transform duration-300 ease-in-out z-30`}
             >
                 <h1 className="text-xl font-bold mt-16 mb-6">点検システム</h1>
+                <div className="text-sm mb-4 text-yellow-500">{myCompanyType ? `${myCompanyType}として利用中` : ""}</div>
                 {userId ? (
                     <>
                         <nav className="mb-8">
                             <ul>
-                                <NavItem icon="📋" label="検査記録作成" href="/" />
+                                {myCompanyType === "協力会社" &&
+                                    <>
+                                    <NavItem icon="📋" label="検査記録作成" href="/" />
+                                    <NavItem icon="📋" label="検査記録管理" href="/inspection_records" />
+                                    </>
+                                }
 
-                                <NavItem icon="🏢" label="設定・管理" href="/profile" />
+                                <NavItem icon={!myCompanyType || isUnlocked ? "🔓" : "🔒"} label="設定" href="/profile" />
+
+                                {myCompanyType === "管理会社" &&
+                                    <>
+                                    <NavItem icon="📍" label="現場管理" href="/sites" />
+                                    <NavItem icon="🏗️" label="シャッター管理" href="/shutters" />
+                                    </>
+                                }
                             </ul>
                         </nav>
                         <Logout />
                     </>
                 ) : (
-                    <p className="text-gray-400">ログインしてください</p>
+                    <>
+                        <p className="text-gray-400">ログインしてください</p>
+                    </>
                 )}
             </aside>
         </>

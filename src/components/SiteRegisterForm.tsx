@@ -19,11 +19,11 @@ const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: (
         furigana: "", // 現場名フリガナ
         address: "", // 現場住所
         purpose: "", // 現場の用途
-        owner_name: "", // オーナー名
-        owner_furigana: "", // オーナー名フリガナ
-        owner_post_number: "", // オーナー郵便番号
-        owner_address: "", // オーナー住所
-        owner_phone_number: "", // オーナー電話番号
+        owner_name: "", // 所有者名
+        owner_furigana: "", // 所有者名フリガナ
+        owner_post_number: "", // 所有者郵便番号
+        owner_address: "", // 所有者住所
+        owner_phone_number: "", // 所有者電話番号
         manager_name: "", // 管理者名
         manager_furigana: "", // 管理者名フリガナ
         manager_post_number: "", // 管理者郵便番号

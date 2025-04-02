@@ -21,11 +21,11 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
         furigana: "", // 現場名フリガナ
         address: "", // 現場住所
         purpose: "", // 現場の用途
-        owner_name: "", // オーナー名
-        owner_furigana: "", // オーナー名フリガナ
-        owner_post_number: "", // オーナー郵便番号
-        owner_address: "", // オーナー住所
-        owner_phone_number: "", // オーナー電話番号
+        owner_name: "", // 所有者名
+        owner_furigana: "", // 所有者名フリガナ
+        owner_post_number: "", // 所有者郵便番号
+        owner_address: "", // 所有者住所
+        owner_phone_number: "", // 所有者電話番号
         manager_name: "", // 管理者名
         manager_furigana: "", // 管理者名フリガナ
         manager_post_number: "", // 管理者郵便番号
@@ -75,19 +75,11 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
 
     const [formData, setFormData] = useState(initialFormData);
 
-    // 📚 `site` から `formData` をマッピング
-    const mapSiteToFormData = (site: Site, company: any) => {
-        return {
-            ...initialFormData, // デフォルト値で初期化
-            ...site, // `site` の値を上書き
-            company_id: site.company_id || company?.id || "", // `company_id` だけ特別扱い
-        };
-    };
-
     // ✅ 初期データ設定
     useEffect(() => {
         if (site) {
-            setFormData(mapSiteToFormData(site, company));
+            const { site_companies, ...cleanedSite } = site;
+            setFormData(cleanedSite);
             fetchSiteCompanies(site.id); // 会社情報をフェッチ
         }
     }, [site, company]);
@@ -141,7 +133,6 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
             alert("⛔ 入力に不備があります。赤枠の項目を確認してください。");
             return;
         }
-
 
         try {
             // **Step 1: 現場 (`sites`) を更新**
