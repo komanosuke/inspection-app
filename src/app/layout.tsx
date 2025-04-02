@@ -33,20 +33,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             setIsLoading(false);
         }
         fetchCompanyType();
-    }, []);
-
-    useEffect(() => {
-        if (!myCompanyType) {
-            router.push("/profile");
-        }
-    }, [myCompanyType]);
+    }, []); 
     
     useEffect(() => {
-        if (!isLoading && pathname === "/" && myCompanyType === "管理会社") {
+        if (!isLoading && pathname === "/" && (!myCompanyType || myCompanyType === "管理会社")) {
             router.push("/profile");
         }
     }, [isLoading, pathname, myCompanyType]);
     
+    if (!isLoading && pathname === "/" && (!myCompanyType || myCompanyType === "管理会社")) {
+        return null;
+    }
 
     return (
         <html lang="ja">

@@ -49,7 +49,7 @@ export default function ProfilePage() {
         const user_id = localStorage.getItem("user_id") || "";
         if (!user_id) {
             console.error("❌ ユーザーIDが見つかりません。");
-            alert("ユーザーIDが見つかりません。");
+            // alert("ユーザーIDが見つかりません。");
             setIsLoading(false);
             return;
         }
