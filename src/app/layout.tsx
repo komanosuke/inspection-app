@@ -26,6 +26,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             const userId = await getUserId();
             if (!userId) {
                 setIsLoading(false);
+                router.push("/");
                 return;
             }
             await fetchMyCompanyType(userId);
