@@ -73,6 +73,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, myCompanyType }) =
         <>
             {/* サイドバー切り替えボタン */}
             <button
+                type="button"
+                title="sidebarChange"
                 className="fixed top-4 left-4 z-40 p-2 bg-gray-700 text-white rounded-lg"
                 onClick={() => setIsOpen(!isOpen)}
             >

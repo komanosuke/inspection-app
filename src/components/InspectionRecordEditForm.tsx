@@ -5,6 +5,7 @@ import InspectionResultEditOrganizer from "./InspectionResultEditOrganizer";
 import { InspectionRecord } from "@/types/inspection_record";
 import { InspectionResult } from "@/types/inspection_result";
 import { useInspectors } from "@/lib/hooks/useInspectors";
+import { useCompanies } from "@/lib/hooks/useCompanies";
 import { useInspectionRecords } from "@/lib/hooks/useInspectionRecords";
 import { useInspectionResults } from "@/lib/hooks/useInspectionResults";
 import { inspectionItems } from "@/data/inspectionItems";
@@ -14,8 +15,11 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
     const { fetchInspectionResults, setInspectionResults, inspectionResults, updateInspectionResult } = useInspectionResults();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { fetchMyCompany, myCompany } = useCompanies();
     const { fetchInspectors, inspectors } = useInspectors();
+    const userId = localStorage.getItem("user_id");
     const [formData, setFormData] = useState<InspectionRecord>({
+        company_id: userId || "",
         shutter_id: "",
         inspection_date: "",
         lead_inspector: "",
@@ -26,10 +30,18 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
     const [editResults, setEditResults] = useState<InspectionResult[]>([]);
 
     useEffect(() => {
-        fetchInspectors();
-        if (inspectionRecord.id) {
-            fetchInspectionResults(inspectionRecord.id);
-        }
+        const loadData = async () => {
+            setLoading(true); // ✅ ローディング開始
+            if (userId) {
+                await fetchMyCompany(userId);
+            }
+            await fetchInspectors();
+            if (inspectionRecord.id) {
+                fetchInspectionResults(inspectionRecord.id);
+            }
+            setLoading(false); // ✅ すべてのフェッチ後に false
+        };
+        loadData();
     }, []);
 
     useEffect(() => {
@@ -100,8 +112,6 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
             if (!updateResult.success) {
                 throw new Error(`Supabase 登録に失敗: ${updateResult.error}`);
             }
-    
-            alert("検査記録を更新しました。");
 
             console.log(updateResult.data[0]);
 
@@ -134,7 +144,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                 console.warn(`⚠️ 一部の検査結果登録に失敗しました (${failedResults.length} 件)。`);
             }
 
-            alert("✅ 検査記録と検査結果の登録が完了しました。");
+            alert("✅ 検査記録と検査結果の更新が完了しました。");
             
             // ✅ 成功したらモーダルを閉じる
             onClose();
@@ -163,9 +173,11 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                 {!inspectors || inspectors.length === 0 ? (
                     <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
                         📂 検査者が登録されていません。<br />
-                        <a href="/inspectors" className="text-blue-500 hover:underline">
-                            検査者を登録する
-                        </a>
+                        {myCompany?.type === "協力会社" && 
+                            <a href="/inspectors" className="text-blue-500 hover:underline">
+                                検査者を登録する
+                            </a>
+                        }
                     </div>
                 ) : (
                     <>

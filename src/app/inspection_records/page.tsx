@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import LoginCheck from '@/components/LoginCheck';
 import PageLockGuard from "@/components/PageLockGuard";
 import InspectionRecordsTable from "@/components/InspectionRecordsTable";
@@ -9,9 +8,13 @@ import { useInspectionRecords } from "@/lib/hooks/useInspectionRecords";
 import { useSites } from "@/lib/hooks/useSites";
 import { useShutters } from "@/lib/hooks/useShutters";
 import { useCompanies } from "@/lib/hooks/useCompanies";
-
+import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const InspectionRecordsPage = () => {
+    const [isNavigating, setIsNavigating] = useState(false);
+    const router = useRouter();
+
     const [loading, setLoading] = useState(false);
     const { fetchInspectionRecords, inspectionRecords, error } = useInspectionRecords();
 
@@ -86,16 +89,25 @@ const InspectionRecordsPage = () => {
             <PageLockGuard
                 company={myCompany}
             >
+                {isNavigating && (
+                    <div className="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
+                        <LoadingSpinner />
+                    </div>
+                )}
                 <div className="bg-white p-4 md:p-8 shadow rounded-lg">
                     <div className="sm:flex justify-between items-center mb-4">
                         <h1 className="text-xl font-bold mb-2 sm:mb-0">検査記録一覧</h1>
 
-                        <Link
-                            href="/"
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsNavigating(true);
+                                router.push("/");
+                            }}
                             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                         >
                             ＋ 新規作成
-                        </Link>
+                        </button>
                     </div>
 
                     {/* ✅ 現場が登録されていない場合 */}

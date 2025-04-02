@@ -45,6 +45,32 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
         is_inspection_by_building_officer: false, // 検査済証交付者_建築主事等
         is_inspection_by_agency: false, // 検査済証交付者_指定機関
         inspection_agency_name: "", // 検査済証交付者_指定機関名
+        // ▼ 防火設備の概要（初期値）
+        uses_zone_evacuation_safety_method: false, // 区画避難安全検証法の適用有無
+        zone_evacuation_floor: 0, // 区画避難適用階（○階）
+
+        uses_floor_evacuation_safety_method: false, // 階避難安全検証法の適用有無
+        floor_evacuation_floor: 0, // 階避難適用階（○階）
+
+        uses_full_building_evacuation_method: false, // 全館避難安全検証法の適用有無
+
+        evacuation_safety_method: false, // その他の有無
+        evacuation_safety_method_other: "", // その他（自由記述）
+
+        has_fire_door: false, // 防火扉の有無
+        fire_door_count: 0, // 防火扉の枚数（○枚）
+
+        has_fire_shutter: false, // 防火シャッターの有無
+        fire_shutter_count: 0, // 防火シャッターの枚数（○枚）
+
+        has_fireproof_screen: false, // 耐火クロススクリーンの有無
+        fireproof_screen_count: 0, // 耐火クロススクリーンの枚数（○枚）
+
+        has_drencher: false, // ドレンチャーの有無
+        drencher_count: 0, // ドレンチャーの台数（○台）
+
+        has_other_fire_equipment: false, // その他防火設備の有無
+        other_fire_equipment_count: 0, // その他防火設備の台数（○台）
     };
 
     const [formData, setFormData] = useState(initialFormData);
@@ -186,7 +212,7 @@ const SiteEditForm = ({ onClose, site, company, permittedCompanies }: { onClose:
                     />
                 )}
 
-                {permittedCompanies.length !== 0 && (
+                {formData.id && permittedCompanies.length !== 0 && (
                     <>
                         {siteFields.map((field) => (
                             <InputField

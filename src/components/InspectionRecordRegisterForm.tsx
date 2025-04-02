@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import InspectionResultOrganizer from "./InspectionResultOrganizer";
+import InspectionRecordsHistoryTable from "./InspectionRecordsHistoryTable";
+import InspectionRecordsHistoryTableModal from "./InspectionRecordsHistoryTableModal";
 import { InspectionRecord } from "@/types/inspection_record";
 import { InspectionResult } from "@/types/inspection_result";
 import { useCompanies } from "@/lib/hooks/useCompanies";
@@ -13,8 +15,9 @@ import { useInspectionResults } from "@/lib/hooks/useInspectionResults";
 import { inspectionItems } from "@/data/inspectionItems";
 
 const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
-    const { createInspectionRecord } = useInspectionRecords();
+    const { createInspectionRecord, fetchInspectionRecords, inspectionRecords } = useInspectionRecords();
     const { createInspectionResult } = useInspectionResults();
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [siteId, setSiteId] = useState<string | null>(null);
@@ -114,7 +117,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 throw new Error(`Supabase 登録に失敗: ${createResult.error}`);
             }
     
-            alert("新規の検査記録を登録しました。");
+            console.log("新規の検査記録を登録しました。");
 
             // ✅ 登録された検査記録のIDを取得
             const recordId = createResult.data[0].id;
@@ -142,7 +145,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 console.warn(`⚠️ 一部の検査結果登録に失敗しました (${failedResults.length} 件)。`);
             }
 
-            alert("✅ 検査記録と検査結果の登録が完了しました。");
+            alert("✅ 検査結果の登録が完了しました。");
             
             // ✅ 成功したらモーダルを閉じる
             onClose();
@@ -171,8 +174,28 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
 
     return (
         <div className="">
+            {/* モーダル（新規登録） */}
+            <InspectionRecordsHistoryTableModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                <>
+                    <div className="text-xl font-bold mb-4">検査履歴</div>
+                    <InspectionRecordsHistoryTable inspectionRecords={inspectionRecords} />
+                </>
+            </InspectionRecordsHistoryTableModal>
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">検査記録作成</h1>
+                {/* <button
+                    onClick={async () => {
+                        if (siteId && shutterId) {
+                            await fetchInspectionRecords(shutterId);
+                            setIsModalOpen(true);
+                        } else {
+                            alert("先に現場とシャッターを選択してください。");
+                        }
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                    履歴
+                </button> */}
             </div>
 
             {/* ✅ ローディング中はスピナーを表示 */}
@@ -262,9 +285,11 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                         {!inspectors || inspectors.length === 0 ? (
                             <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
                                 📂 検査者が登録されていません。
-                                <a href="/inspectors" className="text-blue-500 hover:underline">
-                                    検査者を登録する
-                                </a>
+                                {myCompany?.type === "協力会社" && 
+                                    <a href="/inspectors" className="text-blue-500 hover:underline">
+                                        検査者を登録する
+                                    </a>
+                                }
                             </div>
                         ) : (
                             <>

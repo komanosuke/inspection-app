@@ -128,8 +128,12 @@ const ShuttersPage = () => {
                     )}
 
                     {/* ✅ シャッター一覧テーブル */}
-                    {!loading && !error && shutters && shutters.length > 0 ? (
-                        <ShuttersTable shutters={shutters} />
+                    {!loading && !error && siteId && shutters && shutters.length > 0 ? (
+                        <ShuttersTable
+                            shutters={shutters}
+                            siteId={siteId}
+                            siteName={siteName}
+                        />
                     ) : (
                         !loading && !error && (
                             <div className="text-center p-6">{ siteId && "📂 シャッターデータがありません。"}</div>

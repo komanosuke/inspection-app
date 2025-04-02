@@ -6,11 +6,12 @@ import { InspectionResult } from "@/types/inspection_result";
 import { useInspectionResults } from "@/lib/hooks/useInspectionResults";
 import { inspectionItems } from "@/data/inspectionItems";
 
-const InspectionRecordData = ({ inspectionRecord }: { inspectionRecord: InspectionRecord }) => {
+const InspectionRecordData = ({ inspectionRecord, showExcelButton }: { inspectionRecord: InspectionRecord; showExcelButton: boolean; }) => {
     const { fetchInspectionResults, inspectionResults, error } = useInspectionResults();
     const [loading, setLoading] = useState<boolean>(true);
     const [isExporting, setExporting] = useState(false);
     const [originalResults, setOriginalResults] = useState<InspectionResult[]>([]);
+    
     const handleExportToExcel = () => {
         setExporting(true);
         alert("出力しました!");
@@ -64,15 +65,38 @@ const InspectionRecordData = ({ inspectionRecord }: { inspectionRecord: Inspecti
     }
 
     return (
-        <div className="overflow-x-auto p-4 bg-white rounded-lg w-full">
+        <div className="overflow-x-auto p-0 sm:p-4 bg-white rounded-lg w-full">
             <h2 className="text-xl font-bold mb-4">検査記録データ</h2>
             {/* Excelファイル出力ボタン */}
-            <button
-                className="p-2 bg-green-500 text-white rounded-lg shadow-sm hover:bg-green-600 min-w-[120px]"
-                onClick={handleExportToExcel}
-            >
-                📂 Excel出力
-            </button>
+            {showExcelButton &&
+                <button
+                    className="p-2 bg-green-500 text-white rounded-lg shadow-sm hover:bg-green-600 min-w-[120px]"
+                    onClick={handleExportToExcel}
+                >
+                    📂 Excel出力
+                </button>
+            }
+            <table className="w-full border-collapse border border-gray-300 text-xs mt-4">
+                <tbody>
+                    <tr className="bg-gray-100">
+                        <th className="border px-4 py-2 text-left w-1/4">点検日</th>
+                        <td className="border px-4 py-2 w-1/4">{inspectionRecord.inspection_date}</td>
+                    </tr>
+                    <tr>
+                        <th className="border px-4 py-2 text-left">代表検査者</th>
+                        <td className="border px-4 py-2">{inspectionRecord.lead_inspector}</td>
+                    </tr>
+                    <tr>
+                        <th className="border px-4 py-2 text-left">その他の検査者1</th>
+                        <td className="border px-4 py-2">{inspectionRecord.sub_inspector_1 || "-"}</td>
+                    </tr>
+                    <tr>
+                        <th className="border px-4 py-2 text-left">その他の検査者2</th>
+                        <td className="border px-4 py-2">{inspectionRecord.sub_inspector_2 || "-"}</td>
+                    </tr>
+                </tbody>
+            </table>
+
             <table className="w-full border-collapse border border-gray-300 text-xs mt-4">
                 <thead>
                     <tr className="bg-gray-100">

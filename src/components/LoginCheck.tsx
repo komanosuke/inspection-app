@@ -17,6 +17,7 @@ export default function LoginCheck({ children }: { children: React.ReactNode }) 
     const { getUserId, logout } = useAuth();
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [hasRedirected, setHasRedirected] = useState(false);
 
     useEffect(() => {
         const checkUser = async () => {
@@ -24,6 +25,7 @@ export default function LoginCheck({ children }: { children: React.ReactNode }) 
             if (!uid) {
                 if (pathname !== "/login") { // ✅ ここで無限ループ防止
                     console.error("❌ セッションが取得できませんでした");
+                    setHasRedirected(true);
                     await logout();
                     router.push("/login");
                 }
@@ -35,7 +37,7 @@ export default function LoginCheck({ children }: { children: React.ReactNode }) 
         };
 
         checkUser();
-    }, [getUserId, logout, router]);
+    }, [getUserId, logout, router, pathname, hasRedirected]);
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">読込中...</div>;

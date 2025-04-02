@@ -7,3 +7,8 @@ export type Shutter = {
     created_at?: string;
     updated_at?: string;
 };
+
+export const shutterFields = [
+    { id: "name", label: "シャッター名" },
+    { id: "model_number", label: "型番号" }
+];

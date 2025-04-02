@@ -4,15 +4,13 @@ import React, { useState } from "react";
 import Modal from "@/components/Modal";
 import InspectionRecordData from "@/components/InspectionRecordData";
 import InspectionRecordEditForm from "@/components/InspectionRecordEditForm";
-import { useInspectionRecords } from "@/lib/hooks/useInspectionRecords";
 import PaginationControls from "@/components/PaginationControls";
 
-const InspectionRecordsTable = ({ inspectionRecords }) => {
+const InspectionRecordsHistoryTable = ({ inspectionRecords }) => {
     // ✅ モーダルの状態管理
     const [isInspectionRecordModalOpen, setIsInspectionRecordModalOpen] = useState(false);
     const [isInspectionRecordEditModalOpen, setIsInspectionRecordEditModalOpen] = useState(false);
     const [selectedInspectionRecord, setSelectedInspectionRecord] = useState(null);
-    const { deleteInspectionRecord } = useInspectionRecords();
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -20,36 +18,16 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
     const currentPageData = inspectionRecords.slice(startIndex, endIndex);
     const totalPages = Math.ceil(inspectionRecords.length / itemsPerPage);
 
-    // ✅ 表示用モーダル表示ハンドラー
+    // ✅ モーダル表示ハンドラー
     const handleViewRecord = (record) => {
         setSelectedInspectionRecord(record);
         setIsInspectionRecordModalOpen(true);
     };
 
-    // ✅ 編集用モーダル表示ハンドラー
+    // ✅ モーダル表示ハンドラー
     const handleViewRecordEdit = (record) => {
         setSelectedInspectionRecord(record);
         setIsInspectionRecordEditModalOpen(true);
-    };
-
-    // ✅ 削除ハンドラー
-    const handleDeleteRecord = async (id) => {
-        const isConfirmed = confirm("本当にこの検査記録を削除しますか？");
-        if (!isConfirmed) return;
-
-        try {
-            const result = await deleteInspectionRecord(id);
-
-            if (result.success) {
-                alert("✅ 検査記録を削除しました。");
-                window.location.reload();
-            } else {
-                alert(`⚠️ 削除に失敗しました: ${result.error}`);
-            }
-        } catch (error) {
-            console.error("削除エラー:", error);
-            alert("⚠️ 削除時にエラーが発生しました。");
-        }
     };
 
     return (
@@ -60,7 +38,7 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
                 onClose={() => setIsInspectionRecordModalOpen(false)}
             >
                 {selectedInspectionRecord && (
-                    <InspectionRecordData inspectionRecord={selectedInspectionRecord} showExcelButton={true} />
+                    <InspectionRecordData inspectionRecord={selectedInspectionRecord} showExcelButton={false} />
                 )}
             </Modal>
             <Modal
@@ -106,14 +84,6 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
                                                 onClick={() => handleViewRecordEdit(inspectionRecord)}
                                             >
                                                 ✏️
-                                            </button>
-                                            {/* 🗑️ 削除ボタン（未実装） */}
-                                            <button
-                                                className="block ml-2 text-red-500 hover:text-red-700 text-lg"
-                                                title="削除"
-                                                onClick={() => handleDeleteRecord(inspectionRecord.id)}
-                                            >
-                                                🗑️
                                             </button>
                                         </div>
                                     </div>
@@ -161,4 +131,4 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
     );
 };
 
-export default InspectionRecordsTable;
+export default InspectionRecordsHistoryTable;

@@ -12,7 +12,7 @@ export function useInspectionRecords() {
     const fetchInspectionRecords = async (shutterId?: string) => {
         setLoading(true);
         try {
-            let query = supabase.from("inspection_records").select("*");
+            let query = supabase.from("inspection_records").select("*").order("inspection_date", { ascending: false });
 
             if (shutterId) {
                 query = query.eq("shutter_id", shutterId);

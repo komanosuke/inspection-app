@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import LoginCheck from "@/components/LoginCheck";
 import PageLockGuard from "@/components/PageLockGuard";
 import { useCompanies } from "@/lib/hooks/useCompanies";
 import { useCompanyPermissions } from "@/lib/hooks/useCompanyPermissions";
 import { Company } from "@/types/company";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ProfilePage() {
     const [form, setForm] = useState({
@@ -18,6 +19,9 @@ export default function ProfilePage() {
         can_access_setting_page: false,
         page_lock_password: ""
     } as Company);
+
+    const [isNavigating, setIsNavigating] = useState(false);
+    const router = useRouter();
 
     const [isRegistered, setIsRegistered] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -284,40 +288,61 @@ export default function ProfilePage() {
             <PageLockGuard
                 company={myCompany}
             >
+                {isNavigating && (
+                    <div className="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
+                        <LoadingSpinner />
+                    </div>
+                )}
                 {loading ? (
                     <></>
                 ) : (
                     myCompany?.type === "管理会社" ? (
                         <div className="pt-4 sm:pt-0 pb-8">
                             <div className="flex flex-wrap justify-center gap-4">
-                                <Link
-                                    href="/sites"
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsNavigating(true);
+                                        router.push("/sites");
+                                    }}
                                     className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
                                 >
                                     📍 現場管理
-                                </Link>
-                                <Link
-                                    href="/shutters"
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsNavigating(true);
+                                        router.push("/shutters");
+                                    }}
                                     className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
                                 >
                                     🏗️ シャッター管理
-                                </Link>
-                                <Link
-                                    href="/inspection_records"
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsNavigating(true);
+                                        router.push("/inspection_records");
+                                    }}
                                     className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
                                 >
                                     📋 検査記録管理
-                                </Link>
+                                </button>
                             </div>
                         </div>
-                    ) : (
+                    ) : myCompany?.type === "協力会社" && (
                         <div className="pb-8 text-right">
-                            <Link
-                                href="/inspectors"
-                                className="w-48 mb-2 inline-block text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsNavigating(true);
+                                    router.push("/inspection_records");
+                                }}
+                                className="flex-1 mb-0 block text-xs sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
                             >
                                 👷 検査者管理
-                            </Link>
+                            </button>
                         </div>
                     )
                 )}

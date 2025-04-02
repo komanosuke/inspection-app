@@ -29,6 +29,32 @@ export type Site = {
     is_inspection_by_building_officer?: boolean; // 検査済証交付者_建築主事等
     is_inspection_by_agency?: boolean; // 検査済証交付者_指定機関
     inspection_agency_name?: string; // 検査済証交付者_指定機関名
+    // ▼ 防火設備の概要
+    uses_zone_evacuation_safety_method?: boolean; // 区画避難安全検証法の適用有無
+    zone_evacuation_floor?: number; // 区画避難適用階（○階）
+
+    uses_floor_evacuation_safety_method?: boolean; // 階避難安全検証法の適用有無
+    floor_evacuation_floor?: number; // 階避難適用階（○階）
+
+    uses_full_building_evacuation_method?: boolean; // 全館避難安全検証法の適用有無
+
+    evacuation_safety_method?: boolean; // その他の有無
+    evacuation_safety_method_other?: string; // その他（自由記述：「その他（○○）」など）
+
+    has_fire_door?: boolean; // 防火扉の有無
+    fire_door_count?: number; // 防火扉の枚数（○枚）
+
+    has_fire_shutter?: boolean; // 防火シャッターの有無
+    fire_shutter_count?: number; // 防火シャッターの枚数（○枚）
+
+    has_fireproof_screen?: boolean; // 耐火クロススクリーンの有無
+    fireproof_screen_count?: number; // 耐火クロススクリーンの枚数（○枚）
+
+    has_drencher?: boolean; // ドレンチャーの有無
+    drencher_count?: number; // ドレンチャーの台数（○台）
+
+    has_other_fire_equipment?: boolean; // その他防火設備の有無
+    other_fire_equipment_count?: number; // その他防火設備の台数（○台）
     created_at?: string; // 作成日時
     updated_at?: string; // 更新日時
 };
@@ -132,4 +158,130 @@ export const siteFields = [
         required: false,
         validation: (value: string) => value === "" || value.trim() !== "",
     },
+    // 区画避難安全検証法（チェックボックス）
+    {
+        id: "uses_zone_evacuation_safety_method",
+        label: "区画避難安全検証法の適用有無",
+        type: "checkbox",
+        required: false
+    },
+    // 区画避難適用階（0以上の整数）
+    {
+        id: "zone_evacuation_floor",
+        label: "区画避難適用階（○階）",
+        type: "number",
+        required: false,
+        validation: (value: number) => value >= 0
+    },
+    // 階避難安全検証法（チェックボックス）
+    {
+        id: "uses_floor_evacuation_safety_method",
+        label: "階避難安全検証法の適用有無",
+        type: "checkbox",
+        required: false
+    },
+    // 階避難適用階（0以上の整数）
+    {
+        id: "floor_evacuation_floor",
+        label: "階避難適用階（○階）",
+        type: "number",
+        required: false,
+        validation: (value: number) => value >= 0
+    },
+    // 全館避難安全検証法（チェックボックス）
+    {
+        id: "uses_full_building_evacuation_method",
+        label: "全館避難安全検証法の適用有無",
+        type: "checkbox",
+        required: false
+    },
+    // その他の有無（チェックボックス）
+    {
+        id: "evacuation_safety_method",
+        label: "その他避難安全検証法の有無",
+        type: "checkbox",
+        required: false
+    },
+    // その他の自由記述（任意）
+    {
+        id: "evacuation_safety_method_other",
+        label: "その他避難安全検証法（自由記述）",
+        required: false,
+        validation: (value: string) => value === "" || value.trim() !== ""
+    },
+    // 防火扉の有無（チェックボックス）
+    {
+        id: "has_fire_door",
+        label: "防火扉の有無",
+        type: "checkbox",
+        required: false
+    },
+    // 防火扉の枚数（0以上の整数）
+    {
+        id: "fire_door_count",
+        label: "防火扉の枚数（○枚）",
+        type: "number",
+        required: false,
+        validation: (value: number) => value >= 0
+    },
+    // 防火シャッターの有無（チェックボックス）
+    {
+        id: "has_fire_shutter",
+        label: "防火シャッターの有無",
+        type: "checkbox",
+        required: false
+    },
+    // 防火シャッターの枚数（0以上の整数）
+    {
+        id: "fire_shutter_count",
+        label: "防火シャッターの枚数（○枚）",
+        type: "number",
+        required: false,
+        validation: (value: number) => value >= 0
+    },
+    // 耐火クロススクリーンの有無（チェックボックス）
+    {
+        id: "has_fireproof_screen",
+        label: "耐火クロススクリーンの有無",
+        type: "checkbox",
+        required: false
+    },
+    // 耐火クロススクリーンの枚数（0以上の整数）
+    {
+        id: "fireproof_screen_count",
+        label: "耐火クロススクリーンの枚数（○枚）",
+        type: "number",
+        required: false,
+        validation: (value: number) => value >= 0
+    },
+    // ドレンチャーの有無（チェックボックス）
+    {
+        id: "has_drencher",
+        label: "ドレンチャーの有無",
+        type: "checkbox",
+        required: false
+    },
+    // ドレンチャーの台数（0以上の整数）
+    {
+        id: "drencher_count",
+        label: "ドレンチャーの台数（○台）",
+        type: "number",
+        required: false,
+        validation: (value: number) => value >= 0
+    },
+    // その他防火設備の有無（チェックボックス）
+    {
+        id: "has_other_fire_equipment",
+        label: "その他防火設備の有無",
+        type: "checkbox",
+        required: false
+    },
+    // その他防火設備の台数（0以上の整数）
+    {
+        id: "other_fire_equipment_count",
+        label: "その他防火設備の台数（○台）",
+        type: "number",
+        required: false,
+        validation: (value: number) => value >= 0
+    }
 ];

@@ -53,7 +53,7 @@ const SitesPage = () => {
                 });
     
             setPermittedCompanies(permittedCompaniesList);
-            console.log("✅ permittedCompaniesList:", permittedCompaniesList);
+            // console.log("✅ permittedCompaniesList:", permittedCompaniesList);
         }
     }, [myCompanyPermissions, companies, myCompany]);    
 
