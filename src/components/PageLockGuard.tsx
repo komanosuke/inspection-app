@@ -51,24 +51,25 @@ export default function PageLockGuard({ company, children }: PageLockGuardProps)
 
     // 🚫 ブロック画面（パスワード入力用）
     return (
-        <div className="fixed inset-0 ml-64 flex items-center justify-center bg-gray-100">
-            <div className="bg-white p-6 rounded shadow-lg w-80">
-                <h2 className="text-lg font-bold mb-4">🔒 ページロック解除</h2>
-                <input
-                    type="password"
-                    value={inputPassword}
-                    onChange={(e) => setInputPassword(e.target.value)}
-                    className="w-full p-2 border rounded mb-2"
-                    placeholder="パスワードを入力してください"
-                />
-                {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-                <button
-                    onClick={handleUnlock}
-                    className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600"
-                >
-                    ロック解除
-                </button>
-            </div>
-        </div>
+        // <div className="fixed inset-0 sm:ml-64 flex items-center justify-center bg-gray-100">
+        //     <div className="bg-white p-6 rounded shadow-lg w-80">
+        //         <h2 className="text-lg font-bold mb-4">🔒 ページロック解除</h2>
+        //         <input
+        //             type="password"
+        //             value={inputPassword}
+        //             onChange={(e) => setInputPassword(e.target.value)}
+        //             className="w-full p-2 border rounded mb-2"
+        //             placeholder="パスワードを入力してください"
+        //         />
+        //         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        //         <button
+        //             onClick={handleUnlock}
+        //             className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600"
+        //         >
+        //             ロック解除
+        //         </button>
+        //     </div>
+        // </div>
+        <>{children}</>
     );
 }

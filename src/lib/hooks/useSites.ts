@@ -12,17 +12,53 @@ export function useSites() {
     const fetchSites = async (siteId?: string, companyId?: string) => {
         setLoading(true);
         try {
-            let query = supabase.from("sites").select("*");
+            let sitesResult;
 
             if (siteId) {
-                query = query.eq("id", siteId).single();
+                // ID指定なら単独取得
+                const { data, error } = await supabase
+                    .from("sites")
+                    .select("*")
+                    .eq("id", siteId)
+                    .single();
+
+                if (error) throw error;
+                sitesResult = [data]; // 単体でも配列にしておく
+
             } else if (companyId) {
-                query = query.eq("company_id", companyId);
+                // site_companiesからその会社に関係する現場IDを取得
+                const { data: scData, error: scError } = await supabase
+                    .from("site_companies")
+                    .select("site_id")
+                    .eq("company_id", companyId);
+
+                if (scError) throw scError;
+
+                const siteIds = scData.map((sc) => sc.site_id);
+
+                if (siteIds.length === 0) {
+                    sitesResult = []; // 関連現場がなければ空配列
+                } else {
+                    const { data, error } = await supabase
+                        .from("sites")
+                        .select("*")
+                        .in("id", siteIds);
+
+                    if (error) throw error;
+                    sitesResult = data;
+                }
+
+            } else {
+                // 何も指定がない場合、自社の現場すべて（RLSによる制限あり）
+                const { data, error } = await supabase
+                    .from("sites")
+                    .select("*");
+
+                if (error) throw error;
+                sitesResult = data;
             }
 
-            const { data, error } = await query;
-            if (error) throw error;
-            setSites(Array.isArray(data) ? data : [data]);
+            setSites(sitesResult);
         } catch (error: any) {
             setError(error.message);
         } finally {

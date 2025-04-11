@@ -7,8 +7,6 @@ import { useCompanies } from "@/lib/hooks/useCompanies";
 import { useCompanyPermissions } from "@/lib/hooks/useCompanyPermissions";
 import { Company } from "@/types/company";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
-import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ProfilePage() {
     const [form, setForm] = useState({
@@ -20,8 +18,7 @@ export default function ProfilePage() {
         page_lock_password: ""
     } as Company);
 
-    const [isNavigating, setIsNavigating] = useState(false);
-    const router = useRouter();
+    const [copied, setCopied] = useState(false);
 
     const [isRegistered, setIsRegistered] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -287,68 +284,7 @@ export default function ProfilePage() {
         <LoginCheck>
             <PageLockGuard
                 company={myCompany}
-            >
-                {isNavigating && (
-                    <div className="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
-                        <LoadingSpinner />
-                    </div>
-                )}
-                {loading ? (
-                    <></>
-                ) : (
-                    myCompany?.type === "管理会社" ? (
-                        <div className="pt-4 sm:pt-0 pb-4 sm:pb-8">
-                            <div className="mx-auto flex flex-wrap justify-center gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsNavigating(true);
-                                        router.push("/sites");
-                                    }}
-                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
-                                >
-                                    📍 現場管理
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsNavigating(true);
-                                        router.push("/shutters");
-                                    }}
-                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
-                                >
-                                    🏗️ シャッター管理
-                                </button>
-                            </div>
-                        </div>
-                    ) : myCompany?.type === "協力会社" && (
-                        <div className="pt-4 sm:pt-0 pb-4 sm:pb-8">
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsNavigating(true);
-                                        router.push("/inspectors");
-                                    }}
-                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
-                                >
-                                    👷 検査者管理
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsNavigating(true);
-                                        router.push("/inspection_records");
-                                    }}
-                                    className="flex-1 mb-0 block sm:text-base text-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
-                                >
-                                    📋 検査記録管理
-                                </button>
-                            </div>
-                        </div>
-                    )
-                )}
-                
+            >   
                 <div className="bg-white p-4 md:p-8 shadow rounded-lg">
                     <h1 className="text-xl font-bold mb-4">会社プロフィール設定</h1>
 
@@ -449,7 +385,7 @@ export default function ProfilePage() {
                             {errors.granterCompanyId && <p className="text-red-500 text-sm mb-4">{errors.granterCompanyId}</p>}
 
                             <div className="mb-4 relative">
-                                <div className="flex items-center justify-between">
+                                {/* <div className="flex items-center justify-between">
                                     <label className="block font-bold mb-2">
                                         {isRegistered
                                             ? "設定・管理ページのページロックパスワード（任意変更）"
@@ -471,9 +407,9 @@ export default function ProfilePage() {
                                             {isEditingPassword ? "キャンセル" : "変更する"}
                                         </button>
                                     )}
-                                </div>
+                                </div> */}
 
-                                {(!isRegistered || isEditingPassword) && (
+                                {/* {(!isRegistered || isEditingPassword) && (
                                     <>
                                         <input
                                             type={showPassword ? "text" : "password"}
@@ -502,10 +438,10 @@ export default function ProfilePage() {
                                             <p className="text-red-500 text-sm">{errors.page_lock_password}</p>
                                         )}
                                     </>
-                                )}
+                                )} */}
                             </div>
 
-                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                                 {isRegistered ? "更新" : "登録"}
                             </button>
                         </form>
@@ -514,20 +450,35 @@ export default function ProfilePage() {
 
                 {!isLoading && (
                     <>
-                        {!myCompany ? (
-                            <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
-                                <div className="text-xl font-bold mb-4">管理ページへのリンク</div>
-                                <p>会社情報を登録後、表示されます。</p>
-                            </div>
-                        ) : (
+                        {myCompany && (
                             <>
-                                
                                 {myCompany?.type === "管理会社" && (
                                     <div className="mt-8 bg-white p-4 md:p-8 shadow rounded-lg">
                                         {isRegistered && (
                                             <>
                                                 <div className="text-xl font-bold mb-4">あなたの会社のID <span className="text-sm text-red-500">※ 協力会社に教えてください。</span></div>
-                                                <p>{myCompany.id}</p>
+                                                
+                                                <div className="sm:flex items-center sm:space-x-2">
+                                                    <p className="font-mono bg-gray-100 px-2 py-1 rounded">{myCompany.id}</p>
+                                                    <div className="relative inline-block">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(myCompany.id);
+                                                                setCopied(true);
+                                                                setTimeout(() => setCopied(false), 500);
+                                                            }}
+                                                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mt-2 sm:mt-0"
+                                                        >
+                                                            コピー
+                                                        </button>
+                                                        {copied && (
+                                                            <div className="absolute w-32 text-center -top-8 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-sm px-2 py-1 rounded shadow">
+                                                                コピーしました！
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </>
                                         )}
                                         {pendingCompanies.length > 0 && (

@@ -2,7 +2,7 @@
 
 import "./globals.css";
 import React, { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useCompanies } from "@/lib/hooks/useCompanies";
@@ -10,7 +10,6 @@ import { useCompanies } from "@/lib/hooks/useCompanies";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
-    const pathname = usePathname();
     const [isMounted, setIsMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -33,17 +32,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             setIsLoading(false);
         }
         fetchCompanyType();
-    }, []); 
-    
+    }, []);
+
     useEffect(() => {
-        if (!isLoading && pathname === "/" && (!myCompanyType || myCompanyType === "管理会社")) {
-            router.push("/profile");
+        if (myCompanyType) {
+            localStorage.setItem("company_type", myCompanyType);
         }
-    }, [isLoading, pathname, myCompanyType]);
-    
-    if (!isLoading && pathname === "/" && (!myCompanyType || myCompanyType === "管理会社")) {
-        return null;
-    }
+    }, [myCompanyType]);
 
     return (
         <html lang="ja">

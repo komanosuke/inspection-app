@@ -11,6 +11,12 @@ const InspectionRecordData = ({ inspectionRecord, showExcelButton }: { inspectio
     const [loading, setLoading] = useState<boolean>(true);
     const [isExporting, setExporting] = useState(false);
     const [originalResults, setOriginalResults] = useState<InspectionResult[]>([]);
+    const [companyType, setCompanyType] = useState<string | null>(null);
+
+    useEffect(() => {
+        const type = localStorage.getItem("company_type");
+        setCompanyType(type);
+    }, []);
     
     const handleExportToExcel = () => {
         setExporting(true);
@@ -68,7 +74,7 @@ const InspectionRecordData = ({ inspectionRecord, showExcelButton }: { inspectio
         <div className="overflow-x-auto p-0 sm:p-4 bg-white rounded-lg w-full">
             <h2 className="text-xl font-bold mb-4">検査記録データ</h2>
             {/* Excelファイル出力ボタン */}
-            {showExcelButton &&
+            {showExcelButton && companyType ==="管理会社" &&
                 <button
                     className="p-2 bg-green-500 text-white rounded-lg shadow-sm hover:bg-green-600 min-w-[120px]"
                     onClick={handleExportToExcel}

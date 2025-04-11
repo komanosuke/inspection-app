@@ -182,7 +182,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 </>
             </InspectionRecordsHistoryTableModal>
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">検査記録作成</h1>
+                <h1 className="text-xl font-bold">検査記録作成</h1>
                 {/* <button
                     onClick={async () => {
                         if (siteId && shutterId) {
