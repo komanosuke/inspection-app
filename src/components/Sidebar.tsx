@@ -116,15 +116,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, myCompanyType }) =
                                     <>
                                         <NavItem icon="📝" label="検査記録作成" href="/inspection_records/new" />
                                         <NavItem icon="👷" label="検査者管理" href="/inspectors" />
+                                        <NavItem icon="📋" label="検査記録管理" href="/inspection_records" />
                                     </>
                                 }
                                 {myCompanyType === "管理会社" &&
                                     <>
                                         <NavItem icon="📍" label="現場管理" href="/sites" />
                                         <NavItem icon="🚪" label="シャッター管理" href="/shutters" />
+                                        <NavItem icon="📋" label="検査記録管理" href="/inspection_records" />
                                     </>
                                 }
-                                <NavItem icon="📋" label="検査記録管理" href="/inspection_records" />
 
                                 {/* <NavItem icon={!myCompanyType || isUnlocked ? "🔓" : "🔒"} label="設定" href="/profile" /> */}
                                 <NavItem icon="⚙️" label="設定" href="/profile" />

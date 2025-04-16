@@ -12,4 +12,5 @@ export type InspectionResult = {
     inspector_number: string;
     created_at?: string;
     updated_at?: string;
+    globalIndex?: number;
 };

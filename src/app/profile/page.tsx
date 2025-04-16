@@ -506,7 +506,7 @@ export default function ProfilePage() {
                                                     {approvedCompanies.map((company) => (
                                                         <li
                                                             key={company.id}
-                                                            className="flex justify-between items-center border p-2 rounded bg-gray-200"
+                                                            className="flex justify-between items-center border p-2 rounded bg-gray-200 mt-2"
                                                         >
                                                             {company.name}
                                                             <button

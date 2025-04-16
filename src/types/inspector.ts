@@ -25,7 +25,7 @@ export const inspectorFields = [
     // 氏名のフリガナ（必須）
     { id: "furigana", label: "氏名のフリガナ", required: true, validation: (value: string) => value.trim() !== "" },
     // 郵便番号（必須, 7桁の数字）
-    { id: "post_number", label: "郵便番号", required: true, validation: (value: string) => /^[0-9]{7}$/.test(value) },
+    { id: "post_number", label: "郵便番号", required: true, validation: (value: string) => /^(\d{7}|\d{3}-\d{4})$/.test(value) },
     // 所在地（必須）
     { id: "address", label: "所在地", required: true, validation: (value: string) => value.trim() !== "" },
     // 電話番号（必須, 半角数字・ハイフンのみ）

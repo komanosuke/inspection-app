@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useCompanies } from "@/lib/hooks/useCompanies";
 
 export function useAuth() {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
     const router = useRouter();
+    const { fetchMyCompanyType } = useCompanies();
 
     // ✅ ページロード時にセッションを取得
     useEffect(() => {
@@ -88,6 +90,11 @@ export function useAuth() {
             localStorage.setItem("user_id", data.user.id);
             setUser(data.user);
 
+            // 一応会社タイプも取得
+            const myCompanyType = await fetchMyCompanyType(data.user.id);
+            if (myCompanyType) {
+                localStorage.setItem("company_type", myCompanyType);
+            }
             // 🔹 ルートへリダイレクト
             router.push("/");
             return { success: true, user: data.user };
@@ -107,6 +114,9 @@ export function useAuth() {
             if (error) throw error;
     
             localStorage.removeItem("user_id");
+            localStorage.removeItem("company_type");
+            localStorage.removeItem("site_id");
+            localStorage.removeItem("shutter_id");
             setUser(null);
             return { success: true };
         } catch (error: any) {

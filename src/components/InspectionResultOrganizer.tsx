@@ -93,8 +93,8 @@ const InspectionResultOrganizer: React.FC<Props> = ({ inspectionResults, onResul
                                         <div className="bg-gray-100">
                                             {groupedByMain[main][sub].map((result, resultIndex) => (
                                                 <InspectionResultRegisterForm
-                                                    key={resultIndex}
-                                                    index={resultIndex}
+                                                    key={result.globalIndex}
+                                                    index={result.globalIndex} // ✅ グローバルインデックスを渡す！
                                                     result={result}
                                                     onChange={onResultChange}
                                                 />

@@ -42,8 +42,8 @@ const HomePage = () => {
                     {companyType === "協力会社" && (
                         <>
                             <Card href="/inspection_records/new" icon="📝" title="検査記録作成" />
-                            <Card href="/inspection_records" icon="📋" title="検査記録管理" />
                             <Card href="/inspectors" icon="👷" title="検査者管理" />
+                            <Card href="/inspection_records" icon="📋" title="検査記録管理" />
                         </>
                     )}
 
@@ -51,6 +51,7 @@ const HomePage = () => {
                         <>
                             <Card href="/sites" icon="📍" title="現場管理" />
                             <Card href="/shutters" icon="🚪" title="シャッター管理" />
+                            <Card href="/inspection_records" icon="📋" title="検査記録管理" />
                         </>
                     )}
 

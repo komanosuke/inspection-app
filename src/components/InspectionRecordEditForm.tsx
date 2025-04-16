@@ -25,6 +25,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
         lead_inspector: "",
         sub_inspector_1: "",
         sub_inspector_2: "",
+        special_note: "",
     });
     const [originalResults, setOriginalResults] = useState<InspectionResult[]>([]);
     const [editResults, setEditResults] = useState<InspectionResult[]>([]);
@@ -255,8 +256,21 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                             )}
                         </div>
 
+                        <div className="mb-4">
+                            <label className="block font-bold mb-2" htmlFor="special_note">
+                                特記事項
+                            </label>
+                            <textarea
+                                name="special_note"
+                                className="w-full px-4 py-2 border rounded-lg"
+                                placeholder="特記事項があれば記述"
+                                value={formData.special_note}
+                                onChange={handleChange}
+                            />
+                        </div>
+
                         <div className="flex justify-end">
-                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">登録</button>
+                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">更新</button>
                         </div>
 
                     </>

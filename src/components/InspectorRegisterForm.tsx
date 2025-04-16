@@ -9,6 +9,7 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
     const { createInspector, updateInspector, deleteInspector } = useInspectors();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
     const companyId = localStorage.getItem("user_id") || "";
 
     const [formData, setFormData] = useState<Inspector>({
@@ -67,6 +68,29 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // 🔍 入力バリデーションチェック
+        const newErrors: { [key: string]: string | null } = {};
+        let hasError = false;
+
+        inspectorFields.forEach((field) => {
+            const value = formData[field.id as keyof Inspector]?.toString() || "";
+            const isValid = field.validation ? field.validation(value) : true;
+
+            if (!isValid) {
+                newErrors[field.id] = `${field.label}の形式が正しくありません。`;
+                hasError = true;
+            } else {
+                newErrors[field.id] = null;
+            }
+        });
+
+        setErrors(newErrors);
+
+        if (hasError) {
+            setLoading(false);
+            return;
+        }
     
         try {
             console.log(formData);
@@ -117,6 +141,7 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
                         type={field.type || "text"}
                         required={field.required}
                         onChange={handleChange}
+                        error={errors[field.id] || undefined}
                     />
                 ))}
 

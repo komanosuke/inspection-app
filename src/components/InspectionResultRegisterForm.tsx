@@ -65,6 +65,17 @@ const InspectionResultRegisterForm: React.FC<Props> = ({ index, result, onChange
                         <input
                             type="radio"
                             name={`inspection_result-${index}`}
+                            value="alert"
+                            checked={result.inspection_result === "alert"}
+                            onChange={() => onChange(index, { inspection_result: "alert" })}
+                        />
+                        <span className="ml-2">今後注意</span>
+                    </label>
+
+                    <label className="flex items-center">
+                        <input
+                            type="radio"
+                            name={`inspection_result-${index}`}
                             value="existing_non_compliance"
                             checked={result.inspection_result === "existing_non_compliance"}
                             onChange={() => onChange(index, { inspection_result: "existing_non_compliance" })}

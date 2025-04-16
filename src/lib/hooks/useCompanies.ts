@@ -92,8 +92,10 @@ export function useCompanies() {
 
             if (error) throw error;
             setMyCompanyType(data.type || null);
+            return data.type || null;
         } catch (error: any) {
             setError(error.message);
+            return null;
         } finally {
             setLoading(false);
         }
@@ -186,6 +188,7 @@ export function useCompanies() {
         myCompanyType,
         fetchMyCompany, 
         fetchMyCompanyType,
+        setMyCompanyType,
         fetchCompanies, 
         fetchCompanyById,
         createCompany, 

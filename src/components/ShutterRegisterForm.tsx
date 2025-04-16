@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useShutters } from "@/lib/hooks/useShutters";
-import { Shutter } from "@/types/shutter";
+import { Shutter, shutterFields } from "@/types/shutter";
+import InputField from "@/components/InputField";
 
 const ShutterRegisterForm = ({
     onClose,
@@ -16,12 +17,18 @@ const ShutterRegisterForm = ({
     const { createShutter, updateShutter, deleteShutter } = useShutters();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
+
     const userId = localStorage.getItem("user_id");
     const [formData, setFormData] = useState<Shutter>({
         site_id: siteId, // 現場IDに対応（例）
         company_id: userId || "",
         name: "",
         model_number: "",
+        width: "",
+        height: "",
+        usage_count: 0,
+        installation_location: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -41,6 +48,29 @@ const ShutterRegisterForm = ({
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // 🔍 入力バリデーションチェック
+        const newErrors: { [key: string]: string | null } = {};
+        let hasError = false;
+
+        shutterFields.forEach((field) => {
+            const value = formData[field.id as keyof Shutter]?.toString() || "";
+            const isValid = field.validation ? field.validation(value) : true;
+
+            if (!isValid) {
+                newErrors[field.id] = `${field.label}の形式が正しくありません。`;
+                hasError = true;
+            } else {
+                newErrors[field.id] = null;
+            }
+        });
+
+        setErrors(newErrors);
+
+        if (hasError) {
+            setLoading(false);
+            return;
+        }
     
         try {
             if (!userId) {
@@ -90,16 +120,20 @@ const ShutterRegisterForm = ({
                         <p className="text-red-500">画面を一度閉じて、追加先の現場を選択してください。</p>
                     )}
                 </div>
-
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="name">シャッター名<span className="text-red-500">*</span></label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="text" id="name" value={formData.name} onChange={handleChange} required />
-                </div>
-
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="model_number">モデル番号<span className="text-red-500">*</span></label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="text" id="model_number" value={formData.model_number} onChange={handleChange} required />
-                </div>
+                
+                {shutterFields.map((field) => (
+                    <InputField
+                        key={field.id}
+                        id={field.id}
+                        label={field.label}
+                        value={formData[field.id as keyof Shutter] as string | number}
+                        type={field.type || "text"}
+                        required={field.required}
+                        onChange={handleChange}
+                        error={errors[field.id] || undefined}
+                    />
+                    
+                ))}
 
                 <div className="flex justify-end">
                     <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">登録</button>

@@ -34,7 +34,8 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
         inspection_date: today, // YYYY-MM-DD
         lead_inspector: "",
         sub_inspector_1: "",
-        sub_inspector_2: ""
+        sub_inspector_2: "",
+        special_note: "",
     });
     const [inspectionResults, setInspectionResults] = useState<InspectionResult[]>(
         inspectionItems.map((item, index) => ({
@@ -48,6 +49,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
             inspection_result: "no_issue",
             situation_measures: "",
             inspector_number: "1",
+            globalIndex: index, // フォーム認識用
         }))
     );
 
@@ -124,12 +126,12 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
 
             console.log(createResult.data[0]);
 
-            // ✅ inspectionResults に inspection_record_id をセット
-            const resultsToInsert = inspectionResults.map((result) => ({
+            // ✅ inspectionResults に inspection_record_id をセット globalIndexは除外
+            const resultsToInsert = inspectionResults.map(({ globalIndex, ...result }) => ({
                 ...result,
                 company_id: userId,
                 inspection_record_id: recordId,
-            }));
+            }));            
 
             console.log(resultsToInsert);
 
@@ -355,6 +357,19 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                                     <InspectionResultOrganizer
                                         inspectionResults={inspectionResults}
                                         onResultChange={handleResultChange}
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block font-bold mb-2" htmlFor="special_note">
+                                        特記事項
+                                    </label>
+                                    <textarea
+                                        name="special_note"
+                                        className="w-full px-4 py-2 border rounded-lg"
+                                        placeholder="特記事項があれば記述"
+                                        value={formData.special_note}
+                                        onChange={handleChange}
                                     />
                                 </div>
 

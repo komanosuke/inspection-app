@@ -9,6 +9,7 @@ const InspectorEditForm = ({ onClose, editTarget }: { onClose: () => void; editT
     const { updateInspector } = useInspectors();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
     const companyId = localStorage.getItem("user_id") || "";
 
     const [formData, setFormData] = useState<Inspector>({
@@ -51,6 +52,29 @@ const InspectorEditForm = ({ onClose, editTarget }: { onClose: () => void; editT
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // 🔍 入力バリデーションチェック
+        const newErrors: { [key: string]: string | null } = {};
+        let hasError = false;
+
+        inspectorFields.forEach((field) => {
+            const value = formData[field.id as keyof Inspector]?.toString() || "";
+            const isValid = field.validation ? field.validation(value) : true;
+
+            if (!isValid) {
+                newErrors[field.id] = `${field.label}の形式が正しくありません。`;
+                hasError = true;
+            } else {
+                newErrors[field.id] = null;
+            }
+        });
+
+        setErrors(newErrors);
+
+        if (hasError) {
+            setLoading(false);
+            return;
+        }
 
         if (!editTarget.id) {
             alert("編集対象が不明です。処理を実行できません。");
@@ -106,6 +130,7 @@ const InspectorEditForm = ({ onClose, editTarget }: { onClose: () => void; editT
                         type={field.type || "text"}
                         required={field.required}
                         onChange={handleChange}
+                        error={errors[field.id] || undefined}
                     />
                 ))}
 

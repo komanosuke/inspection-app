@@ -198,10 +198,7 @@ const InspectionRecordsPage = () => {
                     {!loading && companyId && (
                         (!sites || sites.length === 0) ? (
                             <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
-                                📂 現場が登録されていません。<br />
-                                <a href="/sites" className="text-blue-500 hover:underline">
-                                    現場を登録する
-                                </a>
+                                📂 現場が登録されていません。
                             </div>
                         ) : (
                             <div className="mb-4">
@@ -230,10 +227,7 @@ const InspectionRecordsPage = () => {
                     {!loading && companyId && (
                         (siteId && (!shutters || shutters.length === 0) ? (
                             <div className="text-center text-red-500 p-4 border border-red-500 rounded-md mb-2">
-                                📂 シャッターが登録されていません。<br />
-                                <a href="/shutters" className="text-blue-500 hover:underline">
-                                    シャッターを登録する
-                                </a>
+                                📂 シャッターが登録されていません。
                             </div>
                         ) : (
                             siteId && (

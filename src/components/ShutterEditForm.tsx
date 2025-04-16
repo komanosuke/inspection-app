@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useShutters } from "@/lib/hooks/useShutters";
-import { Shutter } from "@/types/shutter";
+import { Shutter, shutterFields } from "@/types/shutter";
+import InputField from "@/components/InputField";
 
 const ShutterEditForm = ({
     onClose,
@@ -18,6 +19,7 @@ const ShutterEditForm = ({
     const { updateShutter } = useShutters();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
     const userId = localStorage.getItem("user_id");
 
     const [formData, setFormData] = useState<Shutter>({
@@ -26,6 +28,10 @@ const ShutterEditForm = ({
         company_id: userId || "",
         name: editTarget.name || "",
         model_number: editTarget.model_number || "",
+        width: editTarget.width || "",
+        height: editTarget.height || "",
+        usage_count: editTarget.usage_count || 0,
+        installation_location: editTarget.installation_location || "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -45,6 +51,29 @@ const ShutterEditForm = ({
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // 🔍 入力バリデーションチェック
+        const newErrors: { [key: string]: string | null } = {};
+        let hasError = false;
+
+        shutterFields.forEach((field) => {
+            const value = formData[field.id as keyof Shutter]?.toString() || "";
+            const isValid = field.validation ? field.validation(value) : true;
+
+            if (!isValid) {
+                newErrors[field.id] = `${field.label}の形式が正しくありません。`;
+                hasError = true;
+            } else {
+                newErrors[field.id] = null;
+            }
+        });
+
+        setErrors(newErrors);
+
+        if (hasError) {
+            setLoading(false);
+            return;
+        }
 
         if (!editTarget.id) {
             alert("編集対象が不明です。処理を実行できません。");
@@ -95,15 +124,19 @@ const ShutterEditForm = ({
                     <p className="">{siteName}</p>
                 </div>
 
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="name">シャッター名<span className="text-red-500">*</span></label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="text" id="name" value={formData.name} onChange={handleChange} required />
-                </div>
-
-                <div className="mb-4">
-                    <label className="block font-bold mb-2" htmlFor="model_number">モデル番号<span className="text-red-500">*</span></label>
-                    <input className="w-full px-4 py-2 border rounded-lg" type="text" id="model_number" value={formData.model_number} onChange={handleChange} required />
-                </div>
+                {shutterFields.map((field) => (
+                    <InputField
+                        key={field.id}
+                        id={field.id}
+                        label={field.label}
+                        value={formData[field.id as keyof Shutter] as string | number}
+                        type={field.type || "text"}
+                        required={field.required}
+                        onChange={handleChange}
+                        error={errors[field.id] || undefined}
+                    />
+                    
+                ))}
 
                 <div className="flex justify-end">
                     <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700">更新</button>

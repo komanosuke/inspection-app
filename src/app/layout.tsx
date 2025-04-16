@@ -14,13 +14,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const { getUserId } = useAuth();
-    const { fetchMyCompanyType, myCompanyType } = useCompanies();
+    const { fetchMyCompanyType, myCompanyType, setMyCompanyType } = useCompanies();
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
     useEffect(() => {
+        const companyTypeFromLocal = localStorage.getItem("company_type");
+        if (companyTypeFromLocal) {
+            // すでにあるならfetchしなくていい
+            setMyCompanyType(companyTypeFromLocal);
+            setIsLoading(false);
+            return;
+        }
         const fetchCompanyType = async () => {
             const userId = await getUserId();
             if (!userId) {

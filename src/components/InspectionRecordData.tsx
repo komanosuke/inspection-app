@@ -135,6 +135,8 @@ const InspectionRecordData = ({ inspectionRecord, showExcelButton }: { inspectio
                     ))}
                 </tbody>
             </table>
+
+            <p className="mt-4 text-xs"><span className="font-bold">特記事項:</span> {inspectionRecord.special_note || "なし"}</p>
         </div>
     );
 };
@@ -146,6 +148,8 @@ const getResultLabel = (result: string) => {
             return "✅ 指摘なし";
         case "needs_correction":
             return "⚠️ 要是正";
+        case "alert":
+            return "👀 今後注意";
         case "existing_non_compliance":
             return "❗️ 既存不適格";
         default:
