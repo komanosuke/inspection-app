@@ -23,8 +23,11 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
         shutter_id: "",
         inspection_date: "",
         lead_inspector: "",
+        lead_inspector_id: "",
         sub_inspector_1: "",
+        sub_inspector_id_1: "",
         sub_inspector_2: "",
+        sub_inspector_id_2: "",
         special_note: "",
     });
     const [originalResults, setOriginalResults] = useState<InspectionResult[]>([]);
@@ -95,13 +98,42 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                     : value
         }));
     };
+
+    const handleInspectorChange = (
+        e: React.ChangeEvent<HTMLSelectElement>,
+        role: "lead" | "sub1" | "sub2"
+    ) => {
+        const name = e.target.value;
+        const selected = inspectors?.find((i) => i.name === name);
+        const id = selected?.id || "";
+    
+        if (role === "lead") {
+            setFormData((prev) => ({
+                ...prev,
+                lead_inspector: name,
+                lead_inspector_id: id,
+            }));
+        } else if (role === "sub1") {
+            setFormData((prev) => ({
+                ...prev,
+                sub_inspector_1: name,
+                sub_inspector_id_1: id,
+            }));
+        } else if (role === "sub2") {
+            setFormData((prev) => ({
+                ...prev,
+                sub_inspector_2: name,
+                sub_inspector_id_2: id,
+            }));
+        }
+    };
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         try {
-            console.log(formData);
+            // console.log(formData);
 
             if (!inspectionRecord.id) {
                 return;
@@ -114,14 +146,14 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                 throw new Error(`Supabase 登録に失敗: ${updateResult.error}`);
             }
 
-            console.log(updateResult.data[0]);
+            // console.log(updateResult.data[0]);
 
             // ✅ 変更があった inspectionResults だけを抽出
             const changedResults = editResults.filter((result, index) => {
                 return JSON.stringify(result) !== JSON.stringify(originalResults[index]);
             });
 
-            console.log(changedResults);
+            // console.log(changedResults);
 
             // ✅ 変更があった結果だけ更新
             const resultPromises = changedResults.map((result) => {
@@ -137,7 +169,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
 
             // ✅ すべての結果を並列処理
             const resultResponses = await Promise.all(resultPromises);
-            console.log(resultResponses);
+            // console.log(resultResponses);
 
             // ✅ 失敗した結果をチェック
             const failedResults = resultResponses.filter((res) => !res.success);
@@ -151,7 +183,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
             onClose();
             window.location.reload();     
         } catch (err: any) {
-            console.error("🔴 エラー:", err);
+            // console.error("🔴 エラー:", err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -191,7 +223,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                                 className="w-full px-4 py-2 border rounded-lg"
                                 id="lead_inspector"
                                 value={formData.lead_inspector}
-                                onChange={handleChange}
+                                onChange={(e) => handleInspectorChange(e, "lead")}
                                 required
                             >
                                 <option value="">検査者を選択してください</option>
@@ -211,7 +243,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                                 className="w-full px-4 py-2 border rounded-lg"
                                 id="sub_inspector_1"
                                 value={formData.sub_inspector_1}
-                                onChange={handleChange}
+                                onChange={(e) => handleInspectorChange(e, "sub1")}
                             >
                                 <option value="">検査者を選択してください（任意）</option>
                                 {inspectors.map((inspector) => (
@@ -230,7 +262,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                                 className="w-full px-4 py-2 border rounded-lg"
                                 id="sub_inspector_2"
                                 value={formData.sub_inspector_2}
-                                onChange={handleChange}
+                                onChange={(e) => handleInspectorChange(e, "sub2")}
                             >
                                 <option value="">検査者を選択してください（任意）</option>
                                 {inspectors.map((inspector) => (
@@ -261,6 +293,7 @@ const InspectionRecordEditForm = ({ onClose, inspectionRecord }: { onClose: () =
                                 特記事項
                             </label>
                             <textarea
+                                id="special_note"
                                 name="special_note"
                                 className="w-full px-4 py-2 border rounded-lg"
                                 placeholder="特記事項があれば記述"

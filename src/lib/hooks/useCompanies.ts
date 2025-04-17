@@ -111,12 +111,12 @@ export function useCompanies() {
                 .single();
 
             if (error) {
-                console.error("❌ 会社情報の取得エラー:", error.message);
+                // console.error("❌ 会社情報の取得エラー:", error.message);
                 return null;
             }
             return data;
         } catch (error: any) {
-            console.error("❌ APIエラー:", error.message);
+            // console.error("❌ APIエラー:", error.message);
             return null;
         }
     };

@@ -168,21 +168,21 @@ const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: (
             if (!success) throw new Error(message);
 
             const newSiteId = data[0]?.id; // 作成された現場ID
-            console.log("✅ 現場作成成功! site_id:", newSiteId);
+            // console.log("✅ 現場作成成功! site_id:", newSiteId);
 
-            // **Step 2: `site_companies` に「ログインしている会社」を登録**
-            console.log("🚀 Step 2: `site_companies` にログイン会社を登録");
+            // // **Step 2: `site_companies` に「ログインしている会社」を登録**
+            // console.log("🚀 Step 2: `site_companies` にログイン会社を登録");
             const mainCompanyResult = await createSiteCompany({
                 site_id: newSiteId,
                 company_id: formData.company_id
             });
             if (!mainCompanyResult.success) {
-                console.error("❌ createSiteCompany (管理会社) エラー:", mainCompanyResult.message);
+                // console.error("❌ createSiteCompany (管理会社) エラー:", mainCompanyResult.message);
                 throw new Error(mainCompanyResult.message);
             }
 
             // **Step 3: `site_companies` に「選択した協力会社」を登録**
-            console.log("🚀 Step 3: `site_companies` に協力会社を登録");
+            // console.log("🚀 Step 3: `site_companies` に協力会社を登録");
             // 新協力会社の追加
             const createResult = await createSiteCompany({
                 site_id: newSiteId,
@@ -196,7 +196,7 @@ const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: (
             onClose(); // 登録後にモーダルを閉じる
             window.location.reload();
         } catch (error: any) {
-            console.error("❌ 登録エラー:", error.message);
+            // console.error("❌ 登録エラー:", error.message);
             alert(`エラー: ${error.message}`);
         }
     };

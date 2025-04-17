@@ -93,16 +93,10 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
         }
     
         try {
-            console.log(formData);
+            // console.log(formData);
     
             const sanitizedFormData = {
                 ...formData,
-                // hire_date: formData.hire_date || null,
-                // birthdate: formData.birthdate || null,
-                // health_check_date: formData.health_check_date || null,
-                // special_health_check_date: formData.special_health_check_date || null,
-                // sending_education_date: formData.sending_education_date || null,
-                // receiving_education_date: formData.receiving_education_date || null,
             };
     
             const createResult = await createInspector(sanitizedFormData);
@@ -117,7 +111,7 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
             onClose();
             window.location.reload();     
         } catch (err: any) {
-            console.error("🔴 エラー:", err);
+            // console.error("🔴 エラー:", err);
             setError(err.message);
         } finally {
             setLoading(false);

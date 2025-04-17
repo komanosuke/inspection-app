@@ -21,14 +21,14 @@ export const shutterFields = [
         required: true,
         validation: (value: string) =>
           /^[0-9]+(?:\.[0-9]+)?(?:\s*[a-zA-Z%]*)?$/.test(value.trim())
-      },
-      {
+    },
+    {
         id: "height",
         label: "高さ（半角数字）",
         required: true,
         validation: (value: string) =>
-          /^[0-9]+(?:\.[0-9]+)?(?:\s*[a-zA-Z%]*)?$/.test(value.trim())
-      },
+            /^[0-9]+(?:\.[0-9]+)?(?:\s*[a-zA-Z%]*)?$/.test(value.trim())
+    },
     {
         id: "usage_count",
         label: "使用回数（半角数字）",

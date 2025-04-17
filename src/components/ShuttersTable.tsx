@@ -6,6 +6,7 @@ import { useShutters } from "@/lib/hooks/useShutters";
 import ShutterData from "@/components/ShutterData";
 import ShutterEditForm from "@/components/ShutterEditForm";
 import PaginationControls from "@/components/PaginationControls";
+import { shutterFields } from "@/types/shutter";
 
 const ShuttersTable = ({ shutters, siteId, siteName }) => {
     const { deleteShutter } = useShutters();
@@ -19,6 +20,11 @@ const ShuttersTable = ({ shutters, siteId, siteName }) => {
     const endIndex = startIndex + itemsPerPage;
     const currentPageData = shutters.slice(startIndex, endIndex);
     const totalPages = Math.ceil(shutters.length / itemsPerPage);
+
+    const slicedShutterFields = shutterFields.slice(1).map(field => ({
+        ...field,
+        label: field.label.split("（")[0],
+    }));  
 
     // ✅ 表示用モーダル表示ハンドラー
     const handleViewRecord = (Record) => {
@@ -47,7 +53,7 @@ const ShuttersTable = ({ shutters, siteId, siteName }) => {
                 alert(`⚠️ 削除に失敗しました: ${result.error}`);
             }
         } catch (error) {
-            console.error("削除エラー:", error);
+            // console.error("削除エラー:", error);
             alert("⚠️ 削除時にエラーが発生しました。");
         }
     };
@@ -80,7 +86,7 @@ const ShuttersTable = ({ shutters, siteId, siteName }) => {
                     <thead className="text-gray-700">
                         <tr className="bg-gray-200">
                             <th className="border border-gray-300 px-2 py-1 min-w-[50px] md:min-w-[70px]">番号</th>
-                            <th className="border border-gray-300 px-2 py-1 min-w-[50px] md:min-w-[150px]">シャッター名</th>
+                            <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">符号</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -132,18 +138,43 @@ const ShuttersTable = ({ shutters, siteId, siteName }) => {
                     </tbody>
                 </table>
                 
-                <div className="overflow-y-auto">
-                    <table className="w-full border-collapse border border-gray-300 text-center">
+                <div className="overflow-y-auto w-full">
+                <table className="w-full border-collapse border border-gray-300 text-center">
                         <thead className="text-gray-700">
                             <tr className="bg-gray-200">
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">型番号</th>
+                                {slicedShutterFields.map((field) => (
+                                    <th
+                                        key={field.id}
+                                        className="border border-gray-300 px-2 py-1 whitespace-nowrap w-auto min-w-[100px] md:min-w-[150px]"
+                                    >
+                                        {field.label}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-                        
                         <tbody>
                             {currentPageData.map((shutter) => (
                                 <tr key={shutter.id} className="bg-white">
-                                    <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{shutter.model_number}</div></td>
+                                    {slicedShutterFields.map((field) => {
+                                        const value = shutter[field.id];
+                                
+                                        return (
+                                            <td
+                                                key={field.id}
+                                                className="border border-gray-300 px-2 py-1 h-[100px]"
+                                            >
+                                                <div className="overflow-hidden line-clamp-3 text-center">
+                                                    {typeof value === "boolean"
+                                                    ? value
+                                                        ? "✅"
+                                                        : "❌"
+                                                    : value !== undefined && value !== null
+                                                        ? String(value)
+                                                        : ""}
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             ))}
                         </tbody>

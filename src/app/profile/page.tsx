@@ -45,7 +45,7 @@ export default function ProfilePage() {
     useEffect(() => {
         const user_id = localStorage.getItem("user_id") || "";
         if (!user_id) {
-            console.error("❌ ユーザーIDが見つかりません。");
+            // console.error("❌ ユーザーIDが見つかりません。");
             // alert("ユーザーIDが見つかりません。");
             setIsLoading(false);
             return;
@@ -132,14 +132,14 @@ export default function ProfilePage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log(form);
+        // console.log(form);
 
         if (!validateForm()) {
             alert("必須項目を入力してください。");
             return;
         }
 
-        console.log("📤 送信データ:", form);
+        // console.log("📤 送信データ:", form);
         const action = isRegistered ? updateCompany : createCompany;
 
         // ✅ パスワードが空の場合、更新データから除外
@@ -164,13 +164,13 @@ export default function ProfilePage() {
             alert("登録/更新が成功しました！");
             window.location.reload(); // サイドバー更新のためページリロード
         } catch (error) {
-            console.error("❌ データ送信エラー:", error);
+            // console.error("❌ データ送信エラー:", error);
             alert("データの送信に失敗しました。");
         }
     };
 
     const handlePermissionsUpdate = async (companyId: string, granterCompanyId: string, companyName: string) => {
-        console.log("🔄 協力会社の申請を作成中...");
+        // console.log("🔄 協力会社の申請を作成中...");
         if (isRegistered && !granterCompanyId) {
             return;
         }
@@ -188,15 +188,15 @@ export default function ProfilePage() {
                 throw new Error(error || "申請の作成に失敗しました");
             }
     
-            console.log("✅ 申請が正常に作成されました！");
+            // console.log("✅ 申請が正常に作成されました！");
         } catch (error) {
-            console.error("❌ パーミッション作成エラー:", error);
+            // console.error("❌ パーミッション作成エラー:", error);
             alert("管理会社への申請に失敗しました。");
         }
     };
 
     const approveRequest = async (companyId: string) => {
-        console.log(`✅ ${companyId} の承認を処理中...`);
+        // console.log(`✅ ${companyId} の承認を処理中...`);
         try {
             if (myCompanyPermissions && myCompany) {
                 // 申請中のパーミッション情報を取得
@@ -223,7 +223,7 @@ export default function ProfilePage() {
                 window.location.reload(); // サイドバー更新のためページリロード
             }
         } catch (error) {
-            console.error("❌ 承認エラー:", error);
+            // console.error("❌ 承認エラー:", error);
             alert("承認処理に失敗しました。");
         }
     };    
@@ -275,7 +275,7 @@ export default function ProfilePage() {
             alert(`${byGranter ? "承認を解除しました！" : "関連を解除しました！"}`);
             window.location.reload();
         } catch (error) {
-            console.error("❌ 承認解除エラー:", error);
+            // console.error("❌ 承認解除エラー:", error);
             alert("承認解除に失敗しました。");
         }
     };

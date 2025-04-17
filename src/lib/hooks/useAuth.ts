@@ -76,6 +76,12 @@ export function useAuth() {
 
     // ✅ ユーザーログイン
     const login = async (email: string, password: string) => {
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("company_type");
+        localStorage.removeItem("site");
+        localStorage.removeItem("site_id");
+        localStorage.removeItem("shutter_id");
+        localStorage.removeItem("selected_company_id");
         setLoading(true);
         setError(null);
 
@@ -115,8 +121,10 @@ export function useAuth() {
     
             localStorage.removeItem("user_id");
             localStorage.removeItem("company_type");
+            localStorage.removeItem("site");
             localStorage.removeItem("site_id");
             localStorage.removeItem("shutter_id");
+            localStorage.removeItem("selected_company_id");
             setUser(null);
             return { success: true };
         } catch (error: any) {

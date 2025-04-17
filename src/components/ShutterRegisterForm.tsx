@@ -82,8 +82,6 @@ const ShutterRegisterForm = ({
                 site_id: siteId,
                 company_id: userId,
             };
-
-            console.log(sanitizedFormData);
     
             const createResult = await createShutter(sanitizedFormData);
     
@@ -97,7 +95,7 @@ const ShutterRegisterForm = ({
             onClose();
             window.location.reload()        
         } catch (err: any) {
-            console.error("🔴 エラー:", err);
+            // console.error("🔴 エラー:", err);
             setError(err.message);
         } finally {
             setLoading(false);

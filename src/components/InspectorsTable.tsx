@@ -6,6 +6,7 @@ import { useInspectors } from "@/lib/hooks/useInspectors";
 import InspectorData from "@/components/InspectorData";
 import InspectorEditForm from "@/components/InspectorEditForm";
 import PaginationControls from "@/components/PaginationControls";
+import { inspectorAllFields } from "@/types/inspector";
 
 const InspectorsTable = ({ inspectors }) => {
     const { deleteInspector } = useInspectors();
@@ -19,6 +20,8 @@ const InspectorsTable = ({ inspectors }) => {
     const endIndex = startIndex + itemsPerPage;
     const currentPageData = inspectors.slice(startIndex, endIndex);
     const totalPages = Math.ceil(inspectors.length / itemsPerPage);
+
+    const inspectorFields = inspectorAllFields.slice(1);
 
     // ✅ 表示用モーダル表示ハンドラー
     const handleViewRecord = (Record) => {
@@ -47,7 +50,7 @@ const InspectorsTable = ({ inspectors }) => {
                 alert(`⚠️ 削除に失敗しました: ${result.error}`);
             }
         } catch (error) {
-            console.error("削除エラー:", error);
+            // console.error("削除エラー:", error);
             alert("⚠️ 削除時にエラーが発生しました。");
         }
     };
@@ -130,18 +133,43 @@ const InspectorsTable = ({ inspectors }) => {
                     </tbody>
                 </table>
                 
-                <div className="overflow-y-auto">
+                <div className="overflow-y-auto w-full">
                     <table className="w-full border-collapse border border-gray-300 text-center">
                         <thead className="text-gray-700">
                             <tr className="bg-gray-200">
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">検査者番号</th>
+                                {inspectorFields.map((field) => (
+                                    <th
+                                        key={field.id}
+                                        className="border border-gray-300 px-2 py-1 whitespace-nowrap w-auto min-w-[100px] md:min-w-[150px]"
+                                    >
+                                        {field.label}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-
                         <tbody>
                             {currentPageData.map((inspector) => (
                                 <tr key={inspector.id} className="bg-white">
-                                    <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{inspector.inspector_number}</div></td>
+                                    {inspectorFields.map((field) => {
+                                        const value = inspector[field.id];
+                                
+                                        return (
+                                            <td
+                                                key={field.id}
+                                                className="border border-gray-300 px-2 py-1 h-[100px]"
+                                            >
+                                                <div className="overflow-hidden line-clamp-3 text-center">
+                                                    {typeof value === "boolean"
+                                                    ? value
+                                                        ? "✅"
+                                                        : "❌"
+                                                    : value !== undefined && value !== null
+                                                        ? String(value)
+                                                        : ""}
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             ))}
                         </tbody>

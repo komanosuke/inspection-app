@@ -7,6 +7,7 @@ import SiteData from "@/components/SiteData";
 import SiteEditForm from "@/components/SiteEditForm";
 import PaginationControls from "@/components/PaginationControls";
 import { useSiteCompanies } from "@/lib/hooks/useSiteCompanies";
+import { siteFields } from "@/types/site";
 
 const SitesTable = ({ sites, company, permittedCompanies }) => {
     const { fetchSiteCompanies, siteCompanies } = useSiteCompanies();
@@ -75,7 +76,7 @@ const SitesTable = ({ sites, company, permittedCompanies }) => {
                 alert(`⚠️ 削除に失敗しました: ${result.error}`);
             }
         } catch (error) {
-            console.error("削除エラー:", error);
+            // console.error("削除エラー:", error);
             alert("⚠️ 削除時にエラーが発生しました。");
         }
     };
@@ -155,19 +156,43 @@ const SitesTable = ({ sites, company, permittedCompanies }) => {
                     </tbody>
                 </table>
                 
-                <div className="overflow-y-auto">
+                <div className="overflow-y-auto w-full">
                     <table className="w-full border-collapse border border-gray-300 text-center">
                         <thead className="text-gray-700">
                             <tr className="bg-gray-200">
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">所有者名</th>
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">住所</th>
+                                {siteFields.map((field) => (
+                                    <th
+                                        key={field.id}
+                                        className="border border-gray-300 px-2 py-1 whitespace-nowrap w-auto min-w-[100px] md:min-w-[150px]"
+                                    >
+                                        {field.label}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
                             {currentPageData.map((site) => (
                                 <tr key={site.id} className="bg-white">
-                                    <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{site.owner_name}</div></td>
-                                    <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{site.address}</div></td>
+                                    {siteFields.map((field) => {
+                                        const value = site[field.id];
+                                
+                                        return (
+                                            <td
+                                                key={field.id}
+                                                className="border border-gray-300 px-2 py-1 h-[100px]"
+                                            >
+                                                <div className="overflow-hidden line-clamp-3 text-center">
+                                                    {typeof value === "boolean"
+                                                    ? value
+                                                        ? "✅"
+                                                        : "❌"
+                                                    : value !== undefined && value !== null
+                                                        ? String(value)
+                                                        : ""}
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             ))}
                         </tbody>

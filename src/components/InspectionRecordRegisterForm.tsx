@@ -33,8 +33,11 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
         shutter_id: shutterId,
         inspection_date: today, // YYYY-MM-DD
         lead_inspector: "",
+        lead_inspector_id: "",
         sub_inspector_1: "",
+        sub_inspector_id_1: "",
         sub_inspector_2: "",
+        sub_inspector_id_2: "",
         special_note: "",
     });
     const [inspectionResults, setInspectionResults] = useState<InspectionResult[]>(
@@ -95,6 +98,35 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                     : value
         }));
     };
+
+    const handleInspectorChange = (
+        e: React.ChangeEvent<HTMLSelectElement>,
+        role: "lead" | "sub1" | "sub2"
+    ) => {
+        const name = e.target.value;
+        const selected = inspectors?.find((i) => i.name === name);
+        const id = selected?.id || "";
+    
+        if (role === "lead") {
+            setFormData((prev) => ({
+                ...prev,
+                lead_inspector: name,
+                lead_inspector_id: id,
+            }));
+        } else if (role === "sub1") {
+            setFormData((prev) => ({
+                ...prev,
+                sub_inspector_1: name,
+                sub_inspector_id_1: id,
+            }));
+        } else if (role === "sub2") {
+            setFormData((prev) => ({
+                ...prev,
+                sub_inspector_2: name,
+                sub_inspector_id_2: id,
+            }));
+        }
+    };
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -110,7 +142,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 company_id: userId,
                 shutter_id: shutterId, // ✅ shutterId も登録
             };
-            console.log(sanitizedFormData);
+            // console.log(sanitizedFormData);
 
             // ✅ 検査記録の作成
             const createResult = await createInspectionRecord(sanitizedFormData);
@@ -119,12 +151,12 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 throw new Error(`Supabase 登録に失敗: ${createResult.error}`);
             }
     
-            console.log("新規の検査記録を登録しました。");
+            // console.log("新規の検査記録を登録しました。");
 
             // ✅ 登録された検査記録のIDを取得
             const recordId = createResult.data[0].id;
 
-            console.log(createResult.data[0]);
+            // console.log(createResult.data[0]);
 
             // ✅ inspectionResults に inspection_record_id をセット globalIndexは除外
             const resultsToInsert = inspectionResults.map(({ globalIndex, ...result }) => ({
@@ -133,7 +165,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                 inspection_record_id: recordId,
             }));            
 
-            console.log(resultsToInsert);
+            // console.log(resultsToInsert);
 
             // ✅ 検査結果の登録（ループで一括登録）
             const resultPromises = resultsToInsert.map((result) => createInspectionResult(result));
@@ -153,7 +185,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
             onClose();
             window.location.reload();
         } catch (err: any) {
-            console.error("🔴 エラー:", err);
+            // console.error("🔴 エラー:", err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -299,7 +331,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                                         className="w-full px-4 py-2 border rounded-lg"
                                         id="lead_inspector"
                                         value={formData.lead_inspector}
-                                        onChange={handleChange}
+                                        onChange={(e) => handleInspectorChange(e, "lead")}
                                         required
                                     >
                                         <option value="">検査者を選択してください</option>
@@ -319,7 +351,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                                         className="w-full px-4 py-2 border rounded-lg"
                                         id="sub_inspector_1"
                                         value={formData.sub_inspector_1}
-                                        onChange={handleChange}
+                                        onChange={(e) => handleInspectorChange(e, "sub1")}
                                     >
                                         <option value="">検査者を選択してください（任意）</option>
                                         {inspectors.map((inspector) => (
@@ -338,7 +370,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                                         className="w-full px-4 py-2 border rounded-lg"
                                         id="sub_inspector_2"
                                         value={formData.sub_inspector_2}
-                                        onChange={handleChange}
+                                        onChange={(e) => handleInspectorChange(e, "sub2")}
                                     >
                                         <option value="">検査者を選択してください（任意）</option>
                                         {inspectors.map((inspector) => (
@@ -365,6 +397,7 @@ const InspectionRecordRegisterForm = ({ onClose }: { onClose: () => void }) => {
                                         特記事項
                                     </label>
                                     <textarea
+                                        id="special_note"
                                         name="special_note"
                                         className="w-full px-4 py-2 border rounded-lg"
                                         placeholder="特記事項があれば記述"

@@ -64,12 +64,12 @@ export function useInspectors() {
                 .select("*");
 
             if (error) {
-                console.error("🔴 Supabase insert エラー:", error.message);
+                // console.error("🔴 Supabase insert エラー:", error.message);
                 return { success: false, error: error.message };
             }
 
             if (!data || data.length === 0) {
-                console.error("🔴 Supabase insert 成功したが、データが返ってこなかった");
+                // console.error("🔴 Supabase insert 成功したが、データが返ってこなかった");
                 return { success: false, error: "登録されたデータが取得できませんでした" };
             }
 

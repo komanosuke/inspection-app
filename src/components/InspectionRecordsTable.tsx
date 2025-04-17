@@ -47,7 +47,7 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
                 alert(`⚠️ 削除に失敗しました: ${result.error}`);
             }
         } catch (error) {
-            console.error("削除エラー:", error);
+            // console.error("削除エラー:", error);
             alert("⚠️ 削除時にエラーが発生しました。");
         }
     };
@@ -130,13 +130,14 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
                     </tbody>
                 </table>
                 
-                <div className="overflow-y-auto">
+                <div className="overflow-y-auto w-full">
                     <table className="w-full border-collapse border border-gray-300 text-center">
                         <thead className="text-gray-700">
                             <tr className="bg-gray-200">
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">代表検査者</th>
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">検査者1</th>
-                                <th className="border border-gray-300 px-2 py-1 min-w-[100px] md:min-w-[150px]">検査者2</th>
+                                <th className="border border-gray-300 px-2 py-1 whitespace-nowrap w-auto min-w-[100px] md:min-w-[150px]">代表検査者</th>
+                                <th className="border border-gray-300 px-2 py-1 whitespace-nowrap w-auto min-w-[100px] md:min-w-[150px]">検査者1</th>
+                                <th className="border border-gray-300 px-2 py-1 whitespace-nowrap w-auto min-w-[100px] md:min-w-[150px]">検査者2</th>
+                                <th className="border border-gray-300 px-2 py-1 whitespace-nowrap w-auto min-w-[100px] md:min-w-[150px]">特記事項</th>
                             </tr>
                         </thead>
                         
@@ -146,6 +147,7 @@ const InspectionRecordsTable = ({ inspectionRecords }) => {
                                     <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{inspectionRecord.lead_inspector}</div></td>
                                     <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{inspectionRecord.sub_inspector_1}</div></td>
                                     <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{inspectionRecord.sub_inspector_2}</div></td>
+                                    <td className="border border-gray-300 px-2 py-1 h-[100px]"><div className="overflow-hidden line-clamp-3">{inspectionRecord.special_note}</div></td>
                                 </tr>
                             ))}
                         </tbody>

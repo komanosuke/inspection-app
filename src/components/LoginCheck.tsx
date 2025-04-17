@@ -25,7 +25,7 @@ export default function LoginCheck({ children }: { children: React.ReactNode }) 
             const uid = await getUserId();
             if (!uid) {
                 if (pathname !== "/login") {
-                    console.log("❌ セッションが取得できませんでした");
+                    // console.log("❌ セッションが取得できませんでした");
                     setHasRedirected(true); // ✅ ここで止めるフラグを立てる
                     await logout();
                     router.push("/login");

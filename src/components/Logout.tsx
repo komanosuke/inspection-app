@@ -16,7 +16,7 @@ export default function Logout() {
         if (success) {
             // alert("ログアウトしました。");
         } else {
-            console.error("ログアウト中にエラーが発生しました:", error);
+            // console.error("ログアウト中にエラーが発生しました:", error);
         }
     };
 

@@ -71,11 +71,17 @@ const InspectionRecordsPage = () => {
     useEffect(() => {
         if (myCompany?.type === "協力会社") {
             setCompanyId(userCompanyId);
+        } else {
+            const selected_company_id = localStorage.getItem("selected_company_id")
+            if (selected_company_id) {
+                setCompanyId(selected_company_id);
+            }
         }
     }, [myCompany, userCompanyId]);
 
     useEffect(() => {
         if (myCompany?.type === "管理会社" && companyId) {
+            localStorage.setItem("selected_company_id", companyId);
             fetchSites(undefined, companyId);
         }
     }, [companyId]);

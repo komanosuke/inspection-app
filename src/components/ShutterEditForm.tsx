@@ -92,7 +92,7 @@ const ShutterEditForm = ({
                 company_id: userId,
             };
 
-            console.log("🟡 編集データ:", sanitizedFormData);
+            // console.log("🟡 編集データ:", sanitizedFormData);
 
             const updateResult = await updateShutter(editTarget.id, sanitizedFormData);
 
@@ -105,7 +105,7 @@ const ShutterEditForm = ({
             onClose();
             window.location.reload();
         } catch (err: any) {
-            console.error("🔴 エラー:", err);
+            // console.error("🔴 エラー:", err);
             setError(err.message);
         } finally {
             setLoading(false);
