@@ -30,27 +30,6 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
         phone_number: "",
     });
 
-    useEffect(() => {
-        setFormData({
-            company_id: companyId,
-            name: "山田 太郎",
-            furigana: "やまだ たろう",
-            post_number: "1234567",
-            address: "東京都新宿区テスト1-1-1",
-            phone_number: "03-1234-5678",
-            inspector_number: "INS-001",
-            workplace_name: "株式会社テスト建設",
-            architect_office_name: "プロ",
-            architect_name: "一級",
-            architect_registration_name: "東京都知事",
-            architect_registration_number: "12345",
-            fire_protection_inspector_number: "FP-999",
-            governor_registration_name: "東京都",
-            governor_registration_number: "67890",
-        });
-    }, []);
-    
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
     

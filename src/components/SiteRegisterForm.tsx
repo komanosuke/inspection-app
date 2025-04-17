@@ -71,66 +71,6 @@ const SiteRegisterForm = ({ onClose, company, permittedCompanies }: { onClose: (
         other_fire_equipment_count: 0, // その他防火設備の台数（○台）
     });
 
-    useEffect(() => {
-        setFormData({
-          company_id: company.id || "",
-          name: "テスト現場",
-          furigana: "てすとげんば",
-          address: "東京都渋谷区テスト町1-1-1",
-          purpose: "マンション",
-          owner_name: "山田 太郎",
-          owner_furigana: "やまだ たろう",
-          owner_post_number: "1234567",
-          owner_address: "東京都品川区1-2-3",
-          owner_phone_number: "090-1234-5678",
-          manager_name: "佐藤 花子",
-          manager_furigana: "さとう はなこ",
-          manager_post_number: "2345678",
-          manager_address: "東京都新宿区4-5-6",
-          manager_phone_number: "080-8765-4321",
-          num_floors_above: 10,
-          num_floors_below: 1,
-          building_area: 250.5,
-          total_floor_area: 1234.5,
-          confirmation_certificate_date: "2025-04-01",
-          confirmation_certificate_number: "ABC-12345",
-          is_confirmation_by_building_officer: true,
-          is_confirmation_by_agency: false,
-          confirmation_agency_name: "",
-          inspection_certificate_date: "2025-05-01",
-          inspection_certificate_number: "XYZ-67890",
-          is_inspection_by_building_officer: false,
-          is_inspection_by_agency: true,
-          inspection_agency_name: "テスト検査機関",
-          // ▼ 防火設備の概要（初期値）
-        uses_zone_evacuation_safety_method: false, // 区画避難安全検証法の適用有無
-        zone_evacuation_floor: 0, // 区画避難適用階（○階）
-
-        uses_floor_evacuation_safety_method: false, // 階避難安全検証法の適用有無
-        floor_evacuation_floor: 0, // 階避難適用階（○階）
-
-        uses_full_building_evacuation_method: false, // 全館避難安全検証法の適用有無
-
-        evacuation_safety_method: false, // その他の有無
-        evacuation_safety_method_other: "", // その他（自由記述）
-
-        has_fire_door: false, // 防火扉の有無
-        fire_door_count: 0, // 防火扉の枚数（○枚）
-
-        has_fire_shutter: false, // 防火シャッターの有無
-        fire_shutter_count: 0, // 防火シャッターの枚数（○枚）
-
-        has_fireproof_screen: false, // 耐火クロススクリーンの有無
-        fireproof_screen_count: 0, // 耐火クロススクリーンの枚数（○枚）
-
-        has_drencher: false, // ドレンチャーの有無
-        drencher_count: 0, // ドレンチャーの台数（○台）
-
-        has_other_fire_equipment: false, // その他防火設備の有無
-        other_fire_equipment_count: 0, // その他防火設備の台数（○台）
-        });
-      }, []);
-
     const handleSiteDataChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { id, value } = e.target;
         setFormData((prev) => ({
