@@ -126,7 +126,7 @@ const InspectorEditForm = ({ onClose, editTarget }: { onClose: () => void; editT
                         key={field.id}
                         id={field.id}
                         label={field.label}
-                        value={formData[field.id as keyof Inspector] as string | number}
+                        value={formData[field.id as keyof Inspector] as string | number | boolean}
                         type={field.type || "text"}
                         required={field.required}
                         onChange={handleChange}
