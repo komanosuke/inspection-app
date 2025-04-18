@@ -42,3 +42,5 @@ DS_Store
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+supabase/.temp/
