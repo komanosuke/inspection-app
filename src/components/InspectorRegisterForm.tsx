@@ -30,6 +30,26 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
         phone_number: "",
     });
 
+    useEffect(() => {
+        setFormData({
+            company_id: companyId,
+            name: "田中 太郎",
+            inspector_number: "123456",
+            furigana: "タナカ タロウ",
+            architect_name: "田中 建築",
+            architect_registration_name: "建築士登録",
+            architect_registration_number: "A-987654",
+            fire_protection_inspector_number: "FP-112233",
+            workplace_name: "東京設計事務所",
+            architect_office_name: "田中建築設計",
+            governor_registration_name: "東京都",
+            governor_registration_number: "T-001122",
+            post_number: "123-4567",
+            address: "東京都千代田区1-2-3",
+            phone_number: "03-1234-5678",
+        });
+    }, []);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
     
@@ -123,7 +143,7 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
                     <label className="block mb-4">
                         <input
                             type="text"
-                            name="architect_office_name"
+                            id="architect_office_name"
                             className="w-64 px-4 py-2 border rounded-lg"
                             value={formData.architect_office_name || ""}
                             onChange={handleChange}
@@ -135,14 +155,14 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
                         <input
                             type="text"
                             className="w-64 px-4 py-2 border rounded-lg"
-                            name="governor_registration_name"
+                            id="governor_registration_name"
                             value={formData.governor_registration_name || ""}
                             onChange={handleChange}
                         /> 知事登録 第 
                         <input
                             type="text"
                             className="ml-2 w-64 px-4 py-2 border rounded-lg"
-                            name="governor_registration_number"
+                            id="governor_registration_number"
                             value={formData.governor_registration_number || ""}
                             onChange={handleChange}
                         /> 号
@@ -158,7 +178,7 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
                         <input
                             type="text"
                             className="w-64 px-4 py-2 border rounded-lg"
-                            name="architect_name"
+                            id="architect_name"
                             value={formData.architect_name || ""}
                             onChange={handleChange}
                         /> 建築士
@@ -169,14 +189,14 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
                         <input
                             type="text"
                             className="w-64 px-4 py-2 border rounded-lg"
-                            name="architect_registration_name"
+                            id="architect_registration_name"
                             value={formData.architect_registration_name || ""}
                             onChange={handleChange}
                         /> 登録 第 
                         <input
                             type="text"
                             className="ml-2 w-64 px-4 py-2 border rounded-lg"
-                            name="architect_registration_number"
+                            id="architect_registration_number"
                             value={formData.architect_registration_number || ""}
                             onChange={handleChange}
                         /> 号
@@ -189,7 +209,7 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
                     <input
                         type="text"
                         className="ml-2 w-64 px-4 py-2 border rounded-lg"
-                        name="fire_protection_inspector_number"
+                        id="fire_protection_inspector_number"
                         value={formData.fire_protection_inspector_number || ""}
                         onChange={handleChange}
                     /> 号
