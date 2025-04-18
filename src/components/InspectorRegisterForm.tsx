@@ -30,25 +30,25 @@ const InspectorRegisterForm = ({ onClose }: { onClose: () => void }) => {
         phone_number: "",
     });
 
-    useEffect(() => {
-        setFormData({
-            company_id: companyId,
-            name: "田中 太郎",
-            inspector_number: "123456",
-            furigana: "タナカ タロウ",
-            architect_name: "田中 建築",
-            architect_registration_name: "建築士登録",
-            architect_registration_number: "A-987654",
-            fire_protection_inspector_number: "FP-112233",
-            workplace_name: "東京設計事務所",
-            architect_office_name: "田中建築設計",
-            governor_registration_name: "東京都",
-            governor_registration_number: "T-001122",
-            post_number: "123-4567",
-            address: "東京都千代田区1-2-3",
-            phone_number: "03-1234-5678",
-        });
-    }, []);
+    // useEffect(() => {
+    //     setFormData({
+    //         company_id: companyId,
+    //         name: "田中 太郎",
+    //         inspector_number: "123456",
+    //         furigana: "タナカ タロウ",
+    //         architect_name: "田中 建築",
+    //         architect_registration_name: "建築士登録",
+    //         architect_registration_number: "A-987654",
+    //         fire_protection_inspector_number: "FP-112233",
+    //         workplace_name: "東京設計事務所",
+    //         architect_office_name: "田中建築設計",
+    //         governor_registration_name: "東京都",
+    //         governor_registration_number: "T-001122",
+    //         post_number: "123-4567",
+    //         address: "東京都千代田区1-2-3",
+    //         phone_number: "03-1234-5678",
+    //     });
+    // }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
